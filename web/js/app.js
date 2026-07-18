@@ -16,6 +16,7 @@ const state = {
   anchor2: null,  // { lng, lat, label } — optional second workplace
   placing2: false, // next map click places anchor2 instead of a candidate
   candidate: null, // { lng, lat } — clicked point being commute-checked
+  candidateZip: null, // nearest ZIP to the candidate; listing links target it
 };
 
 // --- Map ---------------------------------------------------------------
@@ -62,6 +63,7 @@ function schoolsPlaceholder() {
 
 function clearCandidate() {
   state.candidate = null;
+  state.candidateZip = null;
   if (candMarker) { candMarker.remove(); candMarker = null; }
   if (map.getSource("route")) drawRoute(EMPTY_ROUTE);
   $("commute-result").hidden = true;
@@ -266,8 +268,10 @@ async function updateFairZone() {
 
 function setCandidate(lngLat) {
   state.candidate = { lng: lngLat.lng, lat: lngLat.lat };
+  state.candidateZip = nearestZip(lngLat.lat, lngLat.lng);
   if (candMarker) candMarker.remove();
   candMarker = new maplibregl.Marker({ color: "#1b2a41" }).setLngLat(lngLat).addTo(map);
+  render(); // retarget listing links to the selected spot
   routeToCandidate();
 }
 
@@ -420,23 +424,29 @@ function render() {
   const beds = $("beds").value;
   const baths = $("baths").value;
 
-  let zillow = `https://www.zillow.com/homes/for_rent/${state.zip}_rb/`;
+  // Listing links target the commute-checked spot when one is selected,
+  // otherwise the duty station area.
+  const searchZip = state.candidateZip ?? state.zip;
+  const p = placeForZip(searchZip);
+  $("search-area-note").textContent = state.candidateZip
+    ? `Searching around ${p ? `${p.city}, ${p.st} ` : ""}${searchZip} — your selected spot on the map.`
+    : `Searching around your duty area (${searchZip}). Tap the map on a neighborhood to search there instead.`;
+
+  let zillow = `https://www.zillow.com/homes/for_rent/${searchZip}_rb/`;
   if (beds !== "0") zillow += `${beds}-_beds/`;
   if (baths !== "0") zillow += `${baths}-_baths/`;
   if (budget > 0) zillow += `0-${budget}_mp/`;
   $("link-zillow").href = zillow;
 
-  // Apartments.com needs a city-state-zip slug (bare ZIP paths 404), which we
-  // have once the geocoder responds; until then fall back to their search page.
+  // Apartments.com needs a city-state-zip slug (bare ZIP paths 404).
   const aptParts = [];
   if (beds !== "0") aptParts.push(`min-${beds}-bedrooms`);
   if (budget > 0) aptParts.push(`under-${budget}`);
-  const p = placeForZip(state.zip);
   $("link-apartments").href = p
-    ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${state.zip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
+    ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${searchZip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
     : "https://www.apartments.com/";
 
-  $("link-mbo").href = `https://www.militarybyowner.com/homes?type=rent&location=${state.zip}`;
+  $("link-mbo").href = `https://www.militarybyowner.com/homes?type=rent&location=${searchZip}`;
 }
 
 // The location box accepts a 5-digit ZIP directly, or holds a picked city
