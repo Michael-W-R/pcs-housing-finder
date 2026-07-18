@@ -171,6 +171,16 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
 .budget-delta.keep { color: var(--good); }
 .budget-delta.pay { color: var(--warn); }
 
+.anchor-note {
+  margin-top: 0.45rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.bb-row { display: flex; gap: 0.75rem; margin-bottom: 0.9rem; }
+.bb-field { flex: 1; }
+.bb-field label { margin-top: 0; }
+
 .link-row { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .listing-link {

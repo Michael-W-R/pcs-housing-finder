@@ -55,6 +55,7 @@
       <div class="bah-result" id="bah-result" hidden>
         <div class="bah-amount" id="bah-amount">$0</div>
         <div class="bah-label">monthly BAH</div>
+        <div class="anchor-note" id="anchor-note" hidden></div>
       </div>
     </section>
 
@@ -84,7 +85,29 @@
 
     <section class="card" id="search-card" hidden>
       <h2>3 · Find rentals</h2>
-      <p class="hint">Opens listing sites pre-filtered to your area. Live in-app listings are coming in a later phase.</p>
+      <p class="hint">Opens listing sites pre-filtered to your area, budget, and home size. Live in-app listings are coming in a later phase.</p>
+      <div class="bb-row">
+        <div class="bb-field">
+          <label for="beds">Bedrooms</label>
+          <select id="beds">
+            <option value="0">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+          </select>
+        </div>
+        <div class="bb-field">
+          <label for="baths">Bathrooms</label>
+          <select id="baths">
+            <option value="0">Any</option>
+            <option value="1">1+</option>
+            <option value="1.5">1.5+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+          </select>
+        </div>
+      </div>
       <div class="link-row">
         <a class="listing-link" id="link-zillow" target="_blank" rel="noopener">Zillow Rentals</a>
         <a class="listing-link" id="link-apartments" target="_blank" rel="noopener">Apartments.com</a>

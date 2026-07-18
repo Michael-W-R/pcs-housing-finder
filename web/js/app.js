@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 const state = {
-  bah: null, zip: null, mode: "pct", pct: 100, offset: 0,
+  bah: null, zip: null, place: null, mode: "pct", pct: 100, offset: 0,
   range: { pct: [70, 130], usd: [-600, 600] },
 };
 
@@ -36,6 +36,8 @@ async function centerOnZip(zip, label) {
     const j = await r.json();
     const place = j.places?.[0];
     if (!place) return;
+    state.place = { city: place["place name"], st: place["state abbreviation"], zip };
+    render();
     const lngLat = [parseFloat(place.longitude), parseFloat(place.latitude)];
     if (marker) marker.remove();
     marker = new maplibregl.Marker({ color: "#c9a227" })
@@ -49,6 +51,18 @@ async function centerOnZip(zip, label) {
 }
 
 // --- Calculator --------------------------------------------------------
+
+// DoD anchors each grade's BAH to a housing profile (source: DTMO BAH Primer).
+// E1-E4 differ by dependency status; W and O-E grades are interpolated by DoD
+// and have no published anchor, so we show nothing for them.
+function anchorProfile(gradeLabel, withDep) {
+  if (/^E-[1-4]$/.test(gradeLabel)) return withDep ? "2-bedroom apartment" : "1-bedroom apartment";
+  if (["E-5", "O-1", "O-2"].includes(gradeLabel)) return "2-bedroom townhouse or duplex";
+  if (["E-6", "E-7", "E-8", "O-3"].includes(gradeLabel)) return "3-bedroom townhouse or duplex";
+  if (["E-9", "O-4"].includes(gradeLabel)) return "3-bedroom single-family house";
+  if (["O-5", "O-6", "O-7 and above"].includes(gradeLabel)) return "4-bedroom single-family house";
+  return null;
+}
 function currentBudget() {
   if (!state.bah) return 0;
   return state.mode === "pct"
@@ -81,8 +95,31 @@ function render() {
     el.className = "budget-delta";
   }
 
-  $("link-zillow").href = `https://www.zillow.com/homes/for_rent/${state.zip}_rb/`;
-  $("link-apartments").href = `https://www.apartments.com/${state.zip}/`;
+  const grade = $("grade").value;
+  const withDep = document.querySelector('input[name="dep"]:checked').value === "w";
+  const profile = anchorProfile(grade, withDep);
+  $("anchor-note").hidden = !profile;
+  if (profile) $("anchor-note").textContent = `DoD benchmarks this rate to a ${profile} in your area`;
+
+  const beds = $("beds").value;
+  const baths = $("baths").value;
+
+  let zillow = `https://www.zillow.com/homes/for_rent/${state.zip}_rb/`;
+  if (beds !== "0") zillow += `${beds}-_beds/`;
+  if (baths !== "0") zillow += `${baths}-_baths/`;
+  if (budget > 0) zillow += `0-${budget}_mp/`;
+  $("link-zillow").href = zillow;
+
+  // Apartments.com needs a city-state-zip slug (bare ZIP paths 404), which we
+  // have once the geocoder responds; until then fall back to their search page.
+  const aptParts = [];
+  if (beds !== "0") aptParts.push(`min-${beds}-bedrooms`);
+  if (budget > 0) aptParts.push(`under-${budget}`);
+  const p = state.place;
+  $("link-apartments").href = p && p.zip === state.zip
+    ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${p.zip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
+    : "https://www.apartments.com/";
+
   $("link-mbo").href = `https://www.militarybyowner.com/homes?type=rent&location=${state.zip}`;
 }
 
@@ -161,6 +198,8 @@ $("mode-pct").addEventListener("click", () => setMode("pct"));
 $("mode-usd").addEventListener("click", () => setMode("usd"));
 $("range-min").addEventListener("change", updateRange);
 $("range-max").addEventListener("change", updateRange);
+$("beds").addEventListener("change", render);
+$("baths").addEventListener("change", render);
 
 loadBahData(2026)
   .then((y) => { $("data-year").textContent = y; recalc(); })
