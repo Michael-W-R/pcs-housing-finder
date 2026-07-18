@@ -44,6 +44,10 @@ def main() -> None:
         if len(f) < 14:
             continue
         ncessch, name, city, st = f[0], f[2], f[5], f[6]
+        # Guard against malformed rows with shifted columns (e.g. a city name
+        # in the state field), which would also corrupt the coordinates.
+        if not (len(st) == 2 and st.isalpha() and st.isupper()):
+            continue
         lv = levels.get(ncessch)
         if not lv:
             continue
