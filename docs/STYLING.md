@@ -139,12 +139,14 @@ In `web/js/app.js` unless noted:
 
 ## 6. Map basemap (the map's whole look)
 
-The map uses free OpenStreetMap raster tiles, set in the `style:` block of the
-`new maplibregl.Map(...)` call in `app.js`. To change the basemap, replace the
-`tiles:` URL with another provider (e.g. a free key from MapTiler or Stadia
-gives cleaner, more modern basemaps) and update `attribution` to match the
-provider's requirement. Everything drawn on top (markers, zones, routes) is
-unaffected.
+The map uses the free, keyless **OpenFreeMap "Liberty"** vector style, set as
+the `style:` URL in the `new maplibregl.Map(...)` call in `app.js`. To change
+the basemap, swap that URL — other keyless options: OpenFreeMap `bright` or
+`positron` (same URL pattern), Carto raster tiles (Positron / Voyager / Dark
+Matter), Esri World Imagery (satellite), or classic OSM raster tiles. Raster
+options need the older `style: { version: 8, sources: ... }` block — see git
+history (the pre-Liberty version of `app.js`) for the template. Everything
+drawn on top (markers, zones, routes) is unaffected by basemap swaps.
 
 ---
 

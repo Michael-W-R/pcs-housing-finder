@@ -22,18 +22,9 @@ const state = {
 // --- Map ---------------------------------------------------------------
 const map = new maplibregl.Map({
   container: "map",
-  style: {
-    version: 8,
-    sources: {
-      osm: {
-        type: "raster",
-        tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-        tileSize: 256,
-        attribution: "© OpenStreetMap contributors",
-      },
-    },
-    layers: [{ id: "osm", type: "raster", source: "osm" }],
-  },
+  // OpenFreeMap "Liberty" — free, keyless vector basemap (openfreemap.org).
+  // Attribution comes with the style itself.
+  style: "https://tiles.openfreemap.org/styles/liberty",
   center: [-98.5, 39.8],
   zoom: 4,
 });
