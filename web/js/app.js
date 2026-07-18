@@ -12,6 +12,8 @@ const state = {
   range: { pct: [70, 130], usd: [-600, 600] },
   resolved: null, // { label, zip, inst? } when set via city or installation pick
   anchor: null,   // { lng, lat, label } — commute origin (duty marker position)
+  anchor2: null,  // { lng, lat, label } — optional second workplace
+  placing2: false, // next map click places anchor2 instead of a candidate
   candidate: null, // { lng, lat } — clicked point being commute-checked
 };
 
@@ -70,6 +72,15 @@ function haversineMeters(a, b) {
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
+async function fetchRoute(from, to) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
+  const resp = await fetch(url);
+  const j = await resp.json();
+  const route = j.routes?.[0];
+  if (!route) throw new Error("no route");
+  return route;
+}
+
 async function routeToCandidate() {
   if (!state.anchor || !state.candidate) return;
   const a = state.anchor;
@@ -79,21 +90,106 @@ async function routeToCandidate() {
   const fromTxt = nearPlace ? `near ${nearPlace.city}, ${nearPlace.st} ${nearZip}` : "the selected point";
   $("commute-result").hidden = false;
   $("commute-main").textContent = "…";
-  $("commute-sub").textContent = `Checking drive from ${fromTxt} to ${a.label}`;
+  $("commute-sub").textContent = `Checking drive from ${fromTxt}`;
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${c.lng},${c.lat};${a.lng},${a.lat}?overview=full&geometries=geojson`;
-    const resp = await fetch(url);
-    const j = await resp.json();
-    const route = j.routes?.[0];
-    if (!route) throw new Error("no route");
-    drawRoute({ type: "Feature", geometry: route.geometry });
-    $("commute-main").textContent = `${milesText(route.distance)} · ${Math.round(route.duration / 60)} min drive`;
-    $("commute-sub").textContent = `${fromTxt} to ${a.label} · typical roads, no rush-hour traffic yet`;
+    const jobs = [fetchRoute(c, a)];
+    if (state.anchor2) jobs.push(fetchRoute(c, state.anchor2));
+    const [r1, r2] = await Promise.all(jobs);
+    drawRoute({ type: "Feature", geometry: r1.geometry });
+    if (r2) {
+      $("commute-main").textContent =
+        `${Math.round(r1.duration / 60)} min / ${Math.round(r2.duration / 60)} min`;
+      $("commute-sub").textContent =
+        `${fromTxt}: ${milesText(r1.distance)} to ${a.label} · ${milesText(r2.distance)} to ${state.anchor2.label} · no rush-hour traffic yet`;
+    } else {
+      $("commute-main").textContent = `${milesText(r1.distance)} · ${Math.round(r1.duration / 60)} min drive`;
+      $("commute-sub").textContent = `${fromTxt} to ${a.label} · typical roads, no rush-hour traffic yet`;
+    }
   } catch {
     const d = haversineMeters(a, c);
     drawRoute({ type: "Feature", geometry: { type: "LineString", coordinates: [[c.lng, c.lat], [a.lng, a.lat]] } });
     $("commute-main").textContent = `${milesText(d)} straight-line`;
     $("commute-sub").textContent = `Routing service unavailable — showing direct distance from ${fromTxt} to ${a.label}`;
+  }
+}
+
+// --- Fair-commute zone (isochrone shading) ------------------------------
+
+const EMPTY_ZONE = { type: "FeatureCollection", features: [] };
+
+function drawFairZone(feature) {
+  const src = map.getSource("fairzone");
+  const data = feature ?? EMPTY_ZONE;
+  if (src) {
+    src.setData(data);
+  } else {
+    map.addSource("fairzone", { type: "geojson", data });
+    map.addLayer({
+      id: "fairzone-fill", type: "fill", source: "fairzone",
+      paint: { "fill-color": "#c9a227", "fill-opacity": 0.18 },
+    }, map.getLayer("route") ? "route" : undefined);
+    map.addLayer({
+      id: "fairzone-line", type: "line", source: "fairzone",
+      paint: { "line-color": "#c9a227", "line-width": 2, "line-opacity": 0.7 },
+    }, map.getLayer("route") ? "route" : undefined);
+  }
+}
+
+async function fetchIsochrone(pt, minutes) {
+  const json = {
+    locations: [{ lat: pt.lat, lon: pt.lng }],
+    costing: "auto",
+    contours: [{ time: minutes }],
+    polygons: true,
+  };
+  const resp = await fetch(`https://valhalla1.openstreetmap.de/isochrone?json=${encodeURIComponent(JSON.stringify(json))}`);
+  const j = await resp.json();
+  const f = j.features?.[0];
+  if (!f) throw new Error("no isochrone");
+  return f;
+}
+
+let isoTimer = null;
+let isoRun = 0;
+
+function scheduleFairZone() {
+  clearTimeout(isoTimer);
+  isoTimer = setTimeout(updateFairZone, 400);
+}
+
+async function updateFairZone() {
+  const run = ++isoRun;
+  if (!state.anchor) {
+    drawFairZone(null);
+    $("fairzone-status").textContent = "";
+    return;
+  }
+  const min = parseInt($("iso-min").value, 10);
+  $("fairzone-status").textContent = "Computing drive-time zone…";
+  try {
+    const jobs = [fetchIsochrone(state.anchor, min)];
+    if (state.anchor2) jobs.push(fetchIsochrone(state.anchor2, min));
+    const [iso1, iso2] = await Promise.all(jobs);
+    if (run !== isoRun) return; // superseded by a newer request
+    if (iso2) {
+      const overlap = turf.intersect(iso1, iso2);
+      if (!overlap) {
+        drawFairZone(null);
+        $("fairzone-status").textContent =
+          `No area is within ${min} min of both workplaces — try a longer drive time.`;
+        return;
+      }
+      drawFairZone(overlap);
+      $("fairzone-status").textContent =
+        `Shaded: within ${min} min drive of BOTH workplaces. Hunt for housing there.`;
+    } else {
+      drawFairZone(iso1);
+      $("fairzone-status").textContent = `Shaded: within ${min} min drive of ${state.anchor.label}.`;
+    }
+  } catch {
+    if (run !== isoRun) return;
+    drawFairZone(null);
+    $("fairzone-status").textContent = "Drive-time zones are unavailable right now — commute clicks still work.";
   }
 }
 
@@ -104,12 +200,44 @@ function setCandidate(lngLat) {
   routeToCandidate();
 }
 
+let anchor2Marker = null;
+
+function removeAnchor2() {
+  state.anchor2 = null;
+  state.placing2 = false;
+  if (anchor2Marker) { anchor2Marker.remove(); anchor2Marker = null; }
+  $("add-anchor2").textContent = "+ Add second workplace (spouse)";
+  scheduleFairZone();
+  if (state.candidate) routeToCandidate();
+}
+
+function placeAnchor2(lngLat) {
+  state.placing2 = false;
+  state.anchor2 = { lng: lngLat.lng, lat: lngLat.lat, label: "second workplace" };
+  if (anchor2Marker) anchor2Marker.remove();
+  anchor2Marker = new maplibregl.Marker({ color: "#556b2f", draggable: true })
+    .setLngLat(lngLat)
+    .setPopup(new maplibregl.Popup({ offset: 20 }).setHTML("<strong>Second workplace</strong><br>Drag to adjust"))
+    .addTo(map);
+  anchor2Marker.on("dragend", () => {
+    const p = anchor2Marker.getLngLat();
+    state.anchor2 = { ...state.anchor2, lng: p.lng, lat: p.lat };
+    scheduleFairZone();
+    if (state.candidate) routeToCandidate();
+  });
+  $("add-anchor2").textContent = "× Remove second workplace";
+  scheduleFairZone();
+  if (state.candidate) routeToCandidate();
+}
+
 map.on("click", (e) => {
-  if (state.anchor) setCandidate(e.lngLat);
+  if (state.placing2) placeAnchor2(e.lngLat);
+  else if (state.anchor) setCandidate(e.lngLat);
 });
 
 function placeDutyMarker(lngLat, label, popupHtml, zoom) {
   clearCandidate();
+  if (state.anchor2 || state.placing2) removeAnchor2();
   state.anchor = { lng: lngLat[0], lat: lngLat[1], label };
   if (dutyMarker) dutyMarker.remove();
   dutyMarker = new maplibregl.Marker({ color: "#c9a227", draggable: true })
@@ -119,11 +247,13 @@ function placeDutyMarker(lngLat, label, popupHtml, zoom) {
   dutyMarker.on("dragend", () => {
     const p = dutyMarker.getLngLat();
     state.anchor = { lng: p.lng, lat: p.lat, label };
+    scheduleFairZone();
     if (state.candidate) routeToCandidate();
   });
   $("commute-card").hidden = false;
   map.flyTo({ center: lngLat, zoom });
   dutyMarker.togglePopup();
+  scheduleFairZone();
 }
 
 function centerOnZip(zip, label) {
@@ -404,6 +534,20 @@ $("range-min").addEventListener("change", updateRange);
 $("range-max").addEventListener("change", updateRange);
 $("beds").addEventListener("change", render);
 $("baths").addEventListener("change", render);
+$("iso-min").addEventListener("input", () => {
+  $("iso-min-label").textContent = $("iso-min").value;
+  scheduleFairZone();
+});
+$("add-anchor2").addEventListener("click", () => {
+  if (state.anchor2) {
+    removeAnchor2();
+  } else {
+    state.placing2 = !state.placing2;
+    $("add-anchor2").textContent = state.placing2
+      ? "Now click the map at the second workplace…"
+      : "+ Add second workplace (spouse)";
+  }
+});
 
 Promise.all([loadBahData(2026), loadPlaces(), loadInstallations()])
   .then(([y]) => { $("data-year").textContent = y; recalc(); })

@@ -139,6 +139,11 @@ input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--
   margin-top: 0.1rem;
 }
 
+.iso-row { margin-top: 0.5rem; }
+.iso-row label { margin-bottom: 0.1rem; }
+.mode-btn.wide { width: 100%; margin-top: 0.4rem; }
+#fairzone-status { margin: 0.35rem 0 0; }
+
 .commute-result { text-align: center; margin-top: 0.3rem; }
 .commute-main { font-size: 1.35rem; font-weight: 800; color: var(--navy); }
 .commute-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }

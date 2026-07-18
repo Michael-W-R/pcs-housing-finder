@@ -66,6 +66,12 @@
     <section class="card" id="commute-card" hidden>
       <h2>2 · Commute check</h2>
       <p class="hint">Click the map on any neighborhood to see its drive to your duty station. Drag the gold marker onto your actual gate or building to refine.</p>
+      <div class="iso-row">
+        <label for="iso-min">Max drive time: <span id="iso-min-label">30</span> min</label>
+        <input type="range" id="iso-min" min="10" max="60" step="5" value="30">
+      </div>
+      <p class="hint" id="fairzone-status"></p>
+      <button class="mode-btn wide" id="add-anchor2" type="button">+ Add second workplace (spouse)</button>
       <div class="commute-result" id="commute-result" hidden>
         <div class="commute-main" id="commute-main"></div>
         <div class="commute-sub" id="commute-sub"></div>
@@ -137,6 +143,7 @@
 </main>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
