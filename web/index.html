@@ -67,8 +67,13 @@
         <button class="mode-btn" id="mode-usd" type="button">$ offset</button>
       </div>
 
+      <div class="slider-value" id="slider-value">100% of BAH</div>
       <input type="range" id="budget-slider" min="70" max="130" value="100" step="1">
-      <div class="slider-scale"><span id="scale-lo">70%</span><span id="scale-mid">100% = BAH</span><span id="scale-hi">130%</span></div>
+      <div class="slider-scale">
+        <label class="range-edit">Min <input id="range-min" type="number" value="70"></label>
+        <span id="scale-mid">100% = BAH</span>
+        <label class="range-edit">Max <input id="range-max" type="number" value="130"></label>
+      </div>
 
       <div class="budget-result">
         <div class="budget-amount" id="budget-amount">$0</div>

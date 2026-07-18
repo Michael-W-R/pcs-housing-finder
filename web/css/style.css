@@ -132,9 +132,36 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
 .slider-scale {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.7rem;
   color: var(--muted);
   margin-top: 0.1rem;
+}
+
+.slider-value {
+  text-align: center;
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 1.05rem;
+  margin-bottom: 0.2rem;
+}
+
+.range-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 400;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.range-edit input {
+  width: 4.2rem;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
 }
 
 .budget-result { text-align: center; margin-top: 0.9rem; }

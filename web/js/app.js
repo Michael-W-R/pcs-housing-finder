@@ -3,7 +3,10 @@ import { loadBahData, lookupBah } from "./bah.js";
 const $ = (id) => document.getElementById(id);
 const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
-const state = { bah: null, zip: null, mode: "pct", pct: 100, offset: 0 };
+const state = {
+  bah: null, zip: null, mode: "pct", pct: 100, offset: 0,
+  range: { pct: [70, 130], usd: [-600, 600] },
+};
 
 // --- Map ---------------------------------------------------------------
 const map = new maplibregl.Map({
@@ -63,6 +66,7 @@ function render() {
   $("bah-amount").textContent = usd(state.bah);
   const budget = currentBudget();
   $("budget-amount").textContent = usd(budget);
+  $("slider-value").textContent = sliderText();
 
   const delta = budget - state.bah;
   const el = $("budget-delta");
@@ -105,23 +109,43 @@ function recalc() {
   if (zipChanged) centerOnZip(zip, result.mha.name);
 }
 
+function sliderText() {
+  if (state.mode === "pct") return `${state.pct}% of BAH`;
+  if (state.offset === 0) return "Exactly BAH ($0 offset)";
+  return state.offset > 0 ? `BAH + $${state.offset}` : `BAH − $${-state.offset}`;
+}
+
+// Sync slider bounds, range fields, and mode buttons to state, clamping the
+// current value into the active range.
+function applyMode() {
+  const [lo, hi] = state.range[state.mode];
+  const s = $("budget-slider");
+  const cur = state.mode === "pct" ? state.pct : state.offset;
+  const clamped = Math.min(hi, Math.max(lo, cur));
+  if (state.mode === "pct") { state.pct = clamped; s.step = 1; }
+  else { state.offset = clamped; s.step = 25; }
+  s.min = lo; s.max = hi; s.value = clamped;
+  $("range-min").value = lo;
+  $("range-max").value = hi;
+  $("scale-mid").textContent = state.mode === "pct" ? "100% = BAH" : "$0 = BAH";
+  $("mode-pct").classList.toggle("active", state.mode === "pct");
+  $("mode-usd").classList.toggle("active", state.mode === "usd");
+  render();
+}
+
 function setMode(mode) {
   state.mode = mode;
-  $("mode-pct").classList.toggle("active", mode === "pct");
-  $("mode-usd").classList.toggle("active", mode === "usd");
-  const s = $("budget-slider");
-  if (mode === "pct") {
-    s.min = 70; s.max = 130; s.step = 1; s.value = state.pct;
-    $("scale-lo").textContent = "70%";
-    $("scale-mid").textContent = "100% = BAH";
-    $("scale-hi").textContent = "130%";
-  } else {
-    s.min = -600; s.max = 600; s.step = 25; s.value = state.offset;
-    $("scale-lo").textContent = "-$600";
-    $("scale-mid").textContent = "$0 = BAH";
-    $("scale-hi").textContent = "+$600";
-  }
-  render();
+  applyMode();
+}
+
+function updateRange() {
+  const lo = parseInt($("range-min").value, 10);
+  const hi = parseInt($("range-max").value, 10);
+  if (Number.isNaN(lo) || Number.isNaN(hi) || hi <= lo) return;
+  state.range[state.mode] = state.mode === "pct"
+    ? [Math.max(0, lo), Math.min(500, hi)]
+    : [lo, hi];
+  applyMode();
 }
 
 // --- Wiring ------------------------------------------------------------
@@ -135,6 +159,8 @@ $("budget-slider").addEventListener("input", (e) => {
 });
 $("mode-pct").addEventListener("click", () => setMode("pct"));
 $("mode-usd").addEventListener("click", () => setMode("usd"));
+$("range-min").addEventListener("change", updateRange);
+$("range-max").addEventListener("change", updateRange);
 
 loadBahData(2026)
   .then((y) => { $("data-year").textContent = y; recalc(); })
