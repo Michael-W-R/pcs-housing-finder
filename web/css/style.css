@@ -1,4 +1,5 @@
 :root {
+  --blue: #0000FF;
   --navy: #1b2a41;
   --navy-deep: #12203a;
   --gold: #c9a227;
@@ -25,7 +26,7 @@ body {
 }
 
 .topbar {
-  background: var(--navy);
+  background: var(--blue);
   color: #fff;
   padding: 0.6rem 1.25rem;
   display: flex;
