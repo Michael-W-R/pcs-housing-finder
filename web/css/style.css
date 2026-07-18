@@ -1,0 +1,170 @@
+:root {
+  --navy: #1b2a41;
+  --navy-deep: #12203a;
+  --gold: #c9a227;
+  --gold-soft: #e8d48b;
+  --paper: #f7f6f2;
+  --ink: #22252a;
+  --muted: #6b7280;
+  --line: #e2e0d8;
+  --good: #2e7d32;
+  --warn: #b4530a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  padding: 0.6rem 1.25rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex: none;
+}
+
+.brand { display: flex; align-items: baseline; gap: 0.5rem; }
+
+.brand-mark {
+  background: var(--gold);
+  color: var(--navy-deep);
+  font-weight: 800;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.brand-name { font-weight: 700; font-size: 1.15rem; }
+
+.tagline { color: #b9c2d0; font-size: 0.85rem; }
+
+.layout {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.panel {
+  width: 380px;
+  flex: none;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--paper);
+  border-right: 1px solid var(--line);
+}
+
+#map { flex: 1; min-width: 0; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 3px rgba(18, 32, 58, 0.06);
+}
+
+.card h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  color: var(--navy);
+  letter-spacing: 0.01em;
+}
+
+.hint { margin: 0 0 0.8rem; font-size: 0.8rem; color: var(--muted); }
+
+label { display: block; font-size: 0.8rem; font-weight: 600; margin: 0.7rem 0 0.25rem; }
+
+input[type="text"], input[inputmode], select {
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  font-size: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+}
+
+input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+
+.mha-line { margin-top: 0.35rem; font-size: 0.85rem; color: var(--navy); font-weight: 600; }
+.mha-code { color: var(--muted); font-weight: 400; }
+
+.dep-row { display: flex; gap: 1rem; margin-top: 0.7rem; }
+.radio { font-weight: 400; font-size: 0.9rem; display: flex; align-items: center; gap: 0.3rem; margin: 0; }
+
+.bah-result { text-align: center; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px dashed var(--line); }
+.bah-amount { font-size: 2.1rem; font-weight: 800; color: var(--navy); }
+.bah-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+
+.mode-row { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+
+.mode-btn {
+  flex: 1;
+  padding: 0.4rem;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.mode-btn.active {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+  font-weight: 600;
+}
+
+input[type="range"] { width: 100%; accent-color: var(--gold); }
+
+.slider-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+
+.budget-result { text-align: center; margin-top: 0.9rem; }
+.budget-amount { font-size: 1.9rem; font-weight: 800; color: var(--navy); }
+.budget-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.budget-delta { margin-top: 0.4rem; font-size: 0.85rem; font-weight: 600; }
+.budget-delta.keep { color: var(--good); }
+.budget-delta.pay { color: var(--warn); }
+
+.link-row { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.listing-link {
+  display: block;
+  text-align: center;
+  padding: 0.55rem;
+  border: 1px solid var(--navy);
+  border-radius: 6px;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.listing-link:hover { background: var(--navy); color: #fff; }
+
+.panel-footer { font-size: 0.7rem; color: var(--muted); padding: 0 0.25rem; }
+
+@media (max-width: 800px) {
+  .layout { flex-direction: column; }
+  .panel { width: 100%; border-right: none; order: 2; }
+  #map { min-height: 45vh; order: 1; }
+  .tagline { display: none; }
+}

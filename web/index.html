@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCS Housing Finder — BAH-Smart Rental Search for Military Families</title>
+<meta name="description" content="Find rentals that fit your BAH during a PCS move. Official DoD BAH rates, commute-aware search, and school info for military families.">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">PCS</span>
+    <span class="brand-name">Housing Finder</span>
+  </div>
+  <span class="tagline">BAH-smart rental search for military families</span>
+</header>
+
+<main class="layout">
+  <aside class="panel">
+    <section class="card" id="bah-card">
+      <h2>1 · Your BAH</h2>
+      <p class="hint">Official <span id="data-year">2026</span> DoD rates from the Defense Travel Management Office.</p>
+
+      <label for="zip">Duty station ZIP code</label>
+      <input id="zip" inputmode="numeric" maxlength="5" placeholder="e.g. 78234" autocomplete="postal-code">
+      <div class="mha-line" id="mha-line" hidden>
+        <span id="mha-name"></span> <span class="mha-code" id="mha-code"></span>
+      </div>
+
+      <label for="grade">Pay grade</label>
+      <select id="grade">
+        <optgroup label="Enlisted">
+          <option>E-1</option><option>E-2</option><option>E-3</option><option>E-4</option>
+          <option selected>E-5</option><option>E-6</option><option>E-7</option><option>E-8</option><option>E-9</option>
+        </optgroup>
+        <optgroup label="Warrant Officer">
+          <option>W-1</option><option>W-2</option><option>W-3</option><option>W-4</option><option>W-5</option>
+        </optgroup>
+        <optgroup label="Officer (prior enlisted)">
+          <option>O-1E</option><option>O-2E</option><option>O-3E</option>
+        </optgroup>
+        <optgroup label="Officer">
+          <option>O-1</option><option>O-2</option><option>O-3</option><option>O-4</option>
+          <option>O-5</option><option>O-6</option><option>O-7 and above</option>
+        </optgroup>
+      </select>
+
+      <div class="dep-row">
+        <label class="radio"><input type="radio" name="dep" value="w" checked> With dependents</label>
+        <label class="radio"><input type="radio" name="dep" value="wo"> Without</label>
+      </div>
+
+      <div class="bah-result" id="bah-result" hidden>
+        <div class="bah-amount" id="bah-amount">$0</div>
+        <div class="bah-label">monthly BAH</div>
+      </div>
+    </section>
+
+    <section class="card" id="budget-card" hidden>
+      <h2>2 · Your rent budget</h2>
+      <p class="hint">Set a target under BAH to cover utilities or pocket the difference — or over it to widen the search.</p>
+
+      <div class="mode-row">
+        <button class="mode-btn active" id="mode-pct" type="button">% of BAH</button>
+        <button class="mode-btn" id="mode-usd" type="button">$ offset</button>
+      </div>
+
+      <input type="range" id="budget-slider" min="70" max="130" value="100" step="1">
+      <div class="slider-scale"><span id="scale-lo">70%</span><span id="scale-mid">100% = BAH</span><span id="scale-hi">130%</span></div>
+
+      <div class="budget-result">
+        <div class="budget-amount" id="budget-amount">$0</div>
+        <div class="budget-label">max monthly rent</div>
+        <div class="budget-delta" id="budget-delta"></div>
+      </div>
+    </section>
+
+    <section class="card" id="search-card" hidden>
+      <h2>3 · Find rentals</h2>
+      <p class="hint">Opens listing sites pre-filtered to your area. Live in-app listings are coming in a later phase.</p>
+      <div class="link-row">
+        <a class="listing-link" id="link-zillow" target="_blank" rel="noopener">Zillow Rentals</a>
+        <a class="listing-link" id="link-apartments" target="_blank" rel="noopener">Apartments.com</a>
+        <a class="listing-link" id="link-mbo" target="_blank" rel="noopener">MilitaryByOwner</a>
+      </div>
+    </section>
+
+    <footer class="panel-footer">
+      <p>BAH data: official DTMO ASCII files (public domain). This site is not affiliated with or endorsed by the Department of Defense. Verify rates with your finance office.</p>
+    </footer>
+  </aside>
+
+  <div id="map"></div>
+</main>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
