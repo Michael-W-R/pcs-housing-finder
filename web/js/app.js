@@ -55,12 +55,18 @@ function drawRoute(feature) {
   }
 }
 
+function schoolsPlaceholder() {
+  $("schools-list").innerHTML =
+    '<p class="hint" style="margin:0">Tap the map on a neighborhood you\'re considering — its closest public schools will list here.</p>';
+}
+
 function clearCandidate() {
   state.candidate = null;
   if (candMarker) { candMarker.remove(); candMarker = null; }
   if (map.getSource("route")) drawRoute(EMPTY_ROUTE);
   $("commute-result").hidden = true;
-  $("schools-card").hidden = true;
+  $("schools-card").hidden = !state.anchor;
+  if (state.anchor) schoolsPlaceholder();
   drawSchoolDots([]);
 }
 
@@ -315,6 +321,8 @@ function placeDutyMarker(lngLat, label, popupHtml, zoom) {
     if (state.candidate) routeToCandidate();
   });
   $("commute-card").hidden = false;
+  $("schools-card").hidden = false;
+  schoolsPlaceholder();
   map.flyTo({ center: lngLat, zoom });
   dutyMarker.togglePopup();
   scheduleFairZone();
