@@ -3,6 +3,35 @@
 
 const cache = new Map();
 
+// Districts report names to NCES with heavy abbreviation ("STAHL EL",
+// "MADISON H S") which breaks GreatSchools searches and reads poorly.
+// Expand the standard trailing abbreviations and fix ALL-CAPS names.
+const END_EXPANSIONS = [
+  [/\s+H\s?S$/i, " High School"],
+  [/\s+M\s?S$/i, " Middle School"],
+  [/\s+J\s?H\s?S?$/i, " Junior High School"],
+  [/\s+(EL|ELEM|ES)$/i, " Elementary School"],
+  [/\s+INT$/i, " Intermediate School"],
+];
+
+const KEEP_CAPS = new Set(["IDEA", "KIPP", "STEM", "STEAM", "IB", "II", "III", "IV", "ROTC", "JROTC", "JBSA", "AFB"]);
+
+function capWord(w) {
+  return w.split("-").map((p) =>
+    KEEP_CAPS.has(p) ? p : p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()
+  ).join("-");
+}
+
+export function prettySchoolName(raw) {
+  const wasAllCaps = /[A-Z]/.test(raw) && raw === raw.toUpperCase();
+  let name = raw.trim();
+  for (const [re, sub] of END_EXPANSIONS) name = name.replace(re, sub);
+  if (wasAllCaps) {
+    name = name.split(/\s+/).map((w) => (KEEP_CAPS.has(w) ? w : capWord(w))).join(" ");
+  }
+  return name;
+}
+
 export async function schoolsForState(st) {
   if (cache.has(st)) return cache.get(st);
   let schools = [];

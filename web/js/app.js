@@ -3,7 +3,7 @@ import {
   loadPlaces, placeForZip, searchCities, zipsForCity,
   nearestZip, loadInstallations, searchInstallations,
 } from "./places.js";
-import { schoolsForState, nearestSchools } from "./schools.js";
+import { schoolsForState, nearestSchools, prettySchoolName } from "./schools.js";
 
 const $ = (id) => document.getElementById(id);
 const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -111,11 +111,12 @@ async function updateSchools(c, st) {
     const left = document.createElement("span");
     const dot = document.createElement("span");
     dot.className = `lv-dot lv-${s.lv}`;
+    const disp = prettySchoolName(s.n);
     const a = document.createElement("a");
-    a.href = `https://www.greatschools.org/search/search.page?q=${encodeURIComponent(`${s.n} ${s.c}`)}`;
+    a.href = `https://www.greatschools.org/search/search.page?q=${encodeURIComponent(`${disp} ${s.c}`)}`;
     a.target = "_blank";
     a.rel = "noopener";
-    a.textContent = s.n;
+    a.textContent = disp;
     left.append(dot, a);
     const meta = document.createElement("span");
     meta.className = "school-meta";
