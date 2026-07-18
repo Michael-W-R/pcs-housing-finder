@@ -127,6 +127,22 @@ input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--
 
 .suggest button:hover, .suggest button.hi { background: var(--paper); }
 
+.badge {
+  float: right;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--navy-deep);
+  background: var(--gold-soft);
+  border-radius: 3px;
+  padding: 0.1rem 0.3rem;
+  margin-top: 0.1rem;
+}
+
+.commute-result { text-align: center; margin-top: 0.3rem; }
+.commute-main { font-size: 1.35rem; font-weight: 800; color: var(--navy); }
+.commute-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+
 .mha-line { margin-top: 0.35rem; font-size: 0.85rem; color: var(--navy); font-weight: 600; }
 .mha-code { color: var(--muted); font-weight: 400; }
 

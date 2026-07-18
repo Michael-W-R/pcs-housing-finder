@@ -51,3 +51,45 @@ export function zipsForCity(label) {
   if (!cityIndex) buildCityIndex();
   return cityIndex.get(label.replace(", ", "|")) ?? [];
 }
+
+// Nearest ZIP centroid to a point, optionally restricted by a predicate
+// (e.g. "has a BAH rate"). Cheap flat-earth metric is fine at this scale.
+export function nearestZip(lat, lng, predicate = () => true) {
+  if (!data) return null;
+  const cos = Math.cos((lat * Math.PI) / 180);
+  let best = null;
+  let bestD = Infinity;
+  for (const [zip, rec] of Object.entries(data.zip)) {
+    const dLat = rec[1] - lat;
+    const dLng = (rec[2] - lng) * cos;
+    const d = dLat * dLat + dLng * dLng;
+    if (d < bestD && predicate(zip)) {
+      bestD = d;
+      best = zip;
+    }
+  }
+  return best;
+}
+
+// --- Military installations (Census TIGER, public domain) ---------------
+
+let installations = null;
+
+export async function loadInstallations() {
+  const resp = await fetch("data/installations.json");
+  if (!resp.ok) throw new Error(`installations data load failed: ${resp.status}`);
+  installations = await resp.json(); // pre-sorted by land area, biggest first
+}
+
+export function searchInstallations(query, limit = 5) {
+  const q = query.trim().toLowerCase();
+  if (!installations || q.length < 2) return [];
+  const starts = [];
+  const contains = [];
+  for (const it of installations) {
+    const lower = `${it.n}, ${it.s}`.toLowerCase();
+    if (lower.startsWith(q)) starts.push(it);
+    else if (lower.includes(q)) contains.push(it);
+  }
+  return [...starts, ...contains].slice(0, limit);
+}
