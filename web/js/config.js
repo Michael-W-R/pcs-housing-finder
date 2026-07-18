@@ -6,4 +6,4 @@
 // 1. Create an account at https://developer.tomtom.com/
 // 2. Dashboard → API & SDK Keys → copy your key
 // 3. Paste it between the quotes below and push.
-export const TOMTOM_KEY = "";
+export const TOMTOM_KEY = "DKmPwMAd960MjvoqsW0KW3vFwudRMRgd";
