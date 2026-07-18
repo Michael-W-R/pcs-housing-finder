@@ -1,9 +1,12 @@
 # Enabling rush-hour commute times (TomTom key)
 
-The commute check normally shows drive times on open roads. With a free TomTom
-API key configured, every commute check also shows **rush-hour estimates** —
-what the same drive looks like departing at 7:30 AM and 5:15 PM on a weekday,
-based on TomTom's historical + live traffic data.
+The commute check normally shows drive times on open roads (OSRM's estimate).
+With a free TomTom API key configured, TomTom becomes the source of commute
+times for single-workplace checks: the main line shows the typical
+(traffic-free) drive, plus **rush-hour estimates** — the same drive departing
+at 8:30 AM and 5:15 PM on a weekday, from TomTom's historical + live traffic
+data. With a second workplace active, the dual times still come from OSRM
+(keeps quota usage down) and the rush-hour line is hidden.
 
 ## Why a key is needed
 
@@ -24,7 +27,7 @@ until midnight. Plenty for now.
    export const TOMTOM_KEY = "your-key-here";
    ```
 4. Commit and push (or tell Claude to). The next deploy turns the feature on —
-   an orange "Rush hour: ~38 min at 7:30 AM · ~35 min at 5:15 PM" line appears
+   an orange "Rush hour: ~38 min at 8:30 AM · ~35 min at 5:15 PM" line appears
    under each commute result.
 
 ## Notes

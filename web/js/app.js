@@ -209,33 +209,49 @@ function isoLocal(d) {
     `T${p(d.getHours())}:${p(d.getMinutes())}:00${off >= 0 ? "+" : "-"}${p(off / 60)}:${p(off % 60)}`;
 }
 
-async function tomtomMinutes(from, to, departAt) {
+async function tomtomRoute(from, to, departAt) {
   const key = `${from.lng.toFixed(3)},${from.lat.toFixed(3)}|${to.lng.toFixed(3)},${to.lat.toFixed(3)}|${departAt.getHours()}`;
   if (trafficCache.has(key)) return trafficCache.get(key);
   const url = `https://api.tomtom.com/routing/1/calculateRoute/` +
     `${from.lat},${from.lng}:${to.lat},${to.lng}/json` +
-    `?key=${TOMTOM_KEY}&traffic=true&departAt=${encodeURIComponent(isoLocal(departAt))}`;
+    `?key=${TOMTOM_KEY}&traffic=true&computeTravelTimeFor=all&departAt=${encodeURIComponent(isoLocal(departAt))}`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`tomtom ${resp.status}`);
   const j = await resp.json();
-  const mins = Math.round(j.routes[0].summary.travelTimeInSeconds / 60);
-  trafficCache.set(key, mins);
-  return mins;
+  const s = j.routes[0].summary;
+  const out = {
+    traffic: Math.round(s.travelTimeInSeconds / 60),
+    typical: Math.round((s.noTrafficTravelTimeInSeconds ?? s.travelTimeInSeconds) / 60),
+    meters: s.lengthInMeters,
+  };
+  trafficCache.set(key, out);
+  return out;
 }
 
+// When a key is set and there's a single workplace, TomTom owns the commute
+// times (its traffic model beats the OSRM demo's speed estimates). OSRM still
+// draws the route geometry, and remains the fallback if TomTom fails.
 async function updateRushHour(c) {
   const el = $("commute-traffic");
-  if (!TOMTOM_KEY || !state.anchor) { el.hidden = true; return; }
+  if (!TOMTOM_KEY || !state.anchor || state.anchor2) { el.hidden = true; return; }
   try {
     const [am, pm] = await Promise.all([
-      tomtomMinutes(c, state.anchor, nextWeekdayAt(7, 30)),
-      tomtomMinutes(c, state.anchor, nextWeekdayAt(17, 15)),
+      tomtomRoute(c, state.anchor, nextWeekdayAt(8, 30)),
+      tomtomRoute(c, state.anchor, nextWeekdayAt(17, 15)),
     ]);
     if (state.candidate !== c) return; // superseded by a newer click
+    c._tomtomDone = true;
+    $("commute-main").textContent = `${milesText(am.meters)} · ~${am.typical} min typical`;
     el.hidden = false;
-    el.textContent = `Rush hour: ~${am} min at 7:30 AM · ~${pm} min at 5:15 PM`;
+    el.textContent = `Rush hour: ~${am.traffic} min at 8:30 AM · ~${pm.traffic} min at 5:15 PM`;
   } catch {
-    el.hidden = true; // quota/network issues — quietly fall back
+    if (state.candidate !== c) return;
+    c._tomtomFailed = true;
+    el.hidden = true;
+    if (c._osrm) {
+      $("commute-main").textContent =
+        `${milesText(c._osrm.distance)} · ${Math.round(c._osrm.duration / 60)} min drive`;
+    }
   }
 }
 
@@ -268,12 +284,17 @@ async function routeToCandidate() {
     const jobs = [fetchRoute(c, a)];
     if (state.anchor2) jobs.push(fetchRoute(c, state.anchor2));
     const [r1, r2] = await Promise.all(jobs);
+    c._osrm = r1;
     drawRoute({ type: "Feature", geometry: r1.geometry });
     if (r2) {
       $("commute-main").textContent =
         `${Math.round(r1.duration / 60)} min / ${Math.round(r2.duration / 60)} min`;
       $("commute-sub").textContent =
         `${fromTxt}: ${milesText(r1.distance)} to ${a.label} · ${milesText(r2.distance)} to ${state.anchor2.label} · no rush-hour traffic yet`;
+    } else if (TOMTOM_KEY && !c._tomtomFailed) {
+      // TomTom fills in the times; only claim the distance until it does.
+      if (!c._tomtomDone) $("commute-main").textContent = `${milesText(r1.distance)} drive`;
+      $("commute-sub").textContent = `${fromTxt} to ${a.label}`;
     } else {
       $("commute-main").textContent = `${milesText(r1.distance)} · ${Math.round(r1.duration / 60)} min drive`;
       $("commute-sub").textContent = `${fromTxt} to ${a.label} · typical roads, no rush-hour traffic yet`;
