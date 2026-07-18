@@ -149,6 +149,10 @@ async function routeToCandidate() {
   const fromTxt = nearPlace ? `near ${nearPlace.city}, ${nearPlace.st} ${nearZip}` : "the selected point";
   if (nearPlace) updateSchools(c, nearPlace.st);
   $("commute-result").hidden = false;
+  // On phones the panel sits under the map — bring the result into view.
+  if (window.matchMedia("(max-width: 800px)").matches) {
+    $("commute-card").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
   $("commute-main").textContent = "…";
   $("commute-sub").textContent = `Checking drive from ${fromTxt}`;
   try {

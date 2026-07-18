@@ -19,6 +19,7 @@ body {
   color: var(--ink);
   background: var(--paper);
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -279,7 +280,25 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
 
 @media (max-width: 800px) {
   .layout { flex-direction: column; }
-  .panel { width: 100%; border-right: none; order: 2; }
-  #map { min-height: 45vh; order: 1; }
+  #map {
+    order: 1;
+    flex: none;
+    height: 42vh;
+    height: 42dvh;
+    min-height: 250px;
+  }
+  .panel {
+    order: 2;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    padding: 0.75rem;
+  }
+  .topbar { padding: 0.5rem 0.85rem; }
   .tagline { display: none; }
+  .bah-amount { font-size: 1.8rem; }
+  .suggest button { padding: 0.65rem 0.6rem; }
+  .mode-btn, .listing-link { padding: 0.65rem 0.5rem; }
 }
