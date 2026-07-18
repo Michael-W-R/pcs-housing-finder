@@ -23,6 +23,10 @@ OpenStreetMap tiles. Python powers the data pipeline. Deploys as a static site
   (US Government work, public domain). Annual refresh:
   drop the new `BAH-ASCII-<year>.zip` contents into `data/raw/`, then run
   `py tools/build_bah_data.py <yy>`.
+- **ZIP ↔ city/coordinates** — [GeoNames postal data](https://download.geonames.org/export/zip/)
+  (CC BY 4.0, attribution in the site footer). Refresh: re-download `US.zip` into
+  `data/raw/`, extract `US.txt`, then run `py tools/build_places_data.py`.
+  Powers city autocomplete, offline map centering, and listing-site URL slugs.
 
 ## Run locally
 

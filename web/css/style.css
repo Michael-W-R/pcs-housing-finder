@@ -98,6 +98,35 @@ input[type="text"], input[inputmode], select {
 
 input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
 
+.autocomplete { position: relative; }
+
+.suggest {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 6px 14px rgba(18, 32, 58, 0.12);
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.suggest button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.45rem 0.6rem;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.suggest button:hover, .suggest button.hi { background: var(--paper); }
+
 .mha-line { margin-top: 0.35rem; font-size: 0.85rem; color: var(--navy); font-weight: 600; }
 .mha-code { color: var(--muted); font-weight: 400; }
 

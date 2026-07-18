@@ -23,11 +23,15 @@
       <h2>1 · Your BAH</h2>
       <p class="hint">Official <span id="data-year">2026</span> DoD rates from the Defense Travel Management Office.</p>
 
-      <label for="zip">Duty station ZIP code</label>
-      <input id="zip" inputmode="numeric" maxlength="5" placeholder="e.g. 78234" autocomplete="postal-code">
+      <label for="zip">Duty station ZIP code or city</label>
+      <div class="autocomplete">
+        <input id="zip" maxlength="60" placeholder="e.g. 78234 or San Antonio" autocomplete="off">
+        <div class="suggest" id="suggest" hidden></div>
+      </div>
       <div class="mha-line" id="mha-line" hidden>
         <span id="mha-name"></span> <span class="mha-code" id="mha-code"></span>
       </div>
+      <div class="anchor-note" id="city-note" hidden></div>
 
       <label for="grade">Pay grade</label>
       <select id="grade">
@@ -116,7 +120,7 @@
     </section>
 
     <footer class="panel-footer">
-      <p>BAH data: official DTMO ASCII files (public domain). This site is not affiliated with or endorsed by the Department of Defense. Verify rates with your finance office.</p>
+      <p>BAH data: official DTMO ASCII files (public domain). Location data © <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). This site is not affiliated with or endorsed by the Department of Defense. Verify rates with your finance office.</p>
     </footer>
   </aside>
 

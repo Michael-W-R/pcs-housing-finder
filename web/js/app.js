@@ -1,11 +1,13 @@
-import { loadBahData, lookupBah } from "./bah.js";
+import { loadBahData, lookupBah, lookupMha } from "./bah.js";
+import { loadPlaces, placeForZip, searchCities, zipsForCity } from "./places.js";
 
 const $ = (id) => document.getElementById(id);
 const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
 const state = {
-  bah: null, zip: null, place: null, mode: "pct", pct: 100, offset: 0,
+  bah: null, zip: null, mode: "pct", pct: 100, offset: 0,
   range: { pct: [70, 130], usd: [-600, 600] },
+  resolved: null, // { label: "San Antonio, TX", zip } when set via city pick
 };
 
 // --- Map ---------------------------------------------------------------
@@ -29,25 +31,42 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl(), "top-right");
 let marker = null;
 
-async function centerOnZip(zip, label) {
-  try {
-    const r = await fetch(`https://api.zippopotam.us/us/${zip}`);
-    if (!r.ok) return;
-    const j = await r.json();
-    const place = j.places?.[0];
-    if (!place) return;
-    state.place = { city: place["place name"], st: place["state abbreviation"], zip };
-    render();
-    const lngLat = [parseFloat(place.longitude), parseFloat(place.latitude)];
-    if (marker) marker.remove();
-    marker = new maplibregl.Marker({ color: "#c9a227" })
-      .setLngLat(lngLat)
-      .setPopup(new maplibregl.Popup({ offset: 20 }).setHTML(
-        `<strong>${place["place name"]}, ${place["state abbreviation"]} ${zip}</strong><br>${label}`))
-      .addTo(map);
-    map.flyTo({ center: lngLat, zoom: 10 });
-    marker.togglePopup();
-  } catch { /* map centering is best-effort */ }
+function centerOnZip(zip, label) {
+  const place = placeForZip(zip);
+  if (!place) return;
+  const lngLat = [place.lng, place.lat];
+  if (marker) marker.remove();
+  marker = new maplibregl.Marker({ color: "#c9a227" })
+    .setLngLat(lngLat)
+    .setPopup(new maplibregl.Popup({ offset: 20 }).setHTML(
+      `<strong>${place.city}, ${place.st} ${zip}</strong><br>${label}`))
+    .addTo(map);
+  map.flyTo({ center: lngLat, zoom: 10 });
+  marker.togglePopup();
+}
+
+// Resolve a picked city to a representative ZIP: group the city's ZIPs by MHA,
+// take the dominant MHA, and use the ZIP nearest that group's centroid.
+function repZipForCity(label) {
+  const groups = new Map();
+  for (const z of zipsForCity(label)) {
+    const mha = lookupMha(z);
+    if (!mha) continue;
+    let g = groups.get(mha.code);
+    if (!g) groups.set(mha.code, g = []);
+    g.push(z);
+  }
+  let best = null;
+  for (const g of groups.values()) if (!best || g.length > best.length) best = g;
+  if (!best) return null;
+  const pts = best.map((z) => ({ z, p: placeForZip(z) })).filter((x) => x.p);
+  if (!pts.length) return best[0];
+  const cLat = pts.reduce((s, x) => s + x.p.lat, 0) / pts.length;
+  const cLng = pts.reduce((s, x) => s + x.p.lng, 0) / pts.length;
+  pts.sort((a, b) =>
+    (a.p.lat - cLat) ** 2 + (a.p.lng - cLng) ** 2 -
+    ((b.p.lat - cLat) ** 2 + (b.p.lng - cLng) ** 2));
+  return pts[0].z;
 }
 
 // --- Calculator --------------------------------------------------------
@@ -115,19 +134,35 @@ function render() {
   const aptParts = [];
   if (beds !== "0") aptParts.push(`min-${beds}-bedrooms`);
   if (budget > 0) aptParts.push(`under-${budget}`);
-  const p = state.place;
-  $("link-apartments").href = p && p.zip === state.zip
-    ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${p.zip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
+  const p = placeForZip(state.zip);
+  $("link-apartments").href = p
+    ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${state.zip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
     : "https://www.apartments.com/";
 
   $("link-mbo").href = `https://www.militarybyowner.com/homes?type=rent&location=${state.zip}`;
 }
 
+// The location box accepts a 5-digit ZIP directly, or holds a picked city
+// label whose ZIP we resolved in state.resolved.
+function activeZip() {
+  const raw = $("zip").value.trim();
+  if (/^\d{5}$/.test(raw)) return raw;
+  if (state.resolved && raw === state.resolved.label) return state.resolved.zip;
+  return null;
+}
+
 function recalc() {
-  const zip = $("zip").value.trim();
+  const zip = activeZip();
   const grade = $("grade").value;
   const withDep = document.querySelector('input[name="dep"]:checked').value === "w";
-  const result = /^\d{5}$/.test(zip) ? lookupBah(zip, grade, withDep) : null;
+  const result = zip ? lookupBah(zip, grade, withDep) : null;
+
+  const viaCity = !!(state.resolved && zip === state.resolved.zip);
+  $("city-note").hidden = !(viaCity && result);
+  if (viaCity && result) {
+    $("city-note").textContent =
+      `Using central ZIP ${zip}. BAH can differ across a large metro — enter a specific ZIP to refine.`;
+  }
 
   if (!result) {
     state.bah = null;
@@ -139,11 +174,52 @@ function recalc() {
   const zipChanged = state.zip !== zip;
   state.bah = result.rate;
   state.zip = zip;
+  const place = placeForZip(zip);
   $("mha-line").hidden = false;
-  $("mha-name").textContent = result.mha.name;
+  $("mha-name").textContent = place
+    ? `${place.city}, ${place.st} ${zip} · ${result.mha.name}`
+    : result.mha.name;
   $("mha-code").textContent = `(${result.mha.code})`;
   render();
   if (zipChanged) centerOnZip(zip, result.mha.name);
+}
+
+// --- City autocomplete -------------------------------------------------
+function hideSuggest() {
+  $("suggest").hidden = true;
+  $("suggest").innerHTML = "";
+}
+
+function pickCity(label) {
+  const zip = repZipForCity(label);
+  hideSuggest();
+  if (!zip) return;
+  state.resolved = { label, zip };
+  $("zip").value = label;
+  recalc();
+}
+
+function updateSuggest() {
+  const raw = $("zip").value.trim();
+  if (state.resolved && raw !== state.resolved.label) state.resolved = null;
+  if (/^\d/.test(raw) || raw.length < 2 || state.resolved) {
+    hideSuggest();
+    return;
+  }
+  const matches = searchCities(raw);
+  if (!matches.length) {
+    hideSuggest();
+    return;
+  }
+  $("suggest").innerHTML = "";
+  for (const label of matches) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    b.addEventListener("click", () => pickCity(label));
+    $("suggest").appendChild(b);
+  }
+  $("suggest").hidden = false;
 }
 
 function sliderText() {
@@ -186,7 +262,18 @@ function updateRange() {
 }
 
 // --- Wiring ------------------------------------------------------------
-$("zip").addEventListener("input", recalc);
+$("zip").addEventListener("input", () => { updateSuggest(); recalc(); });
+$("zip").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !$("suggest").hidden) {
+    const first = $("suggest").querySelector("button");
+    if (first) pickCity(first.textContent);
+  } else if (e.key === "Escape") {
+    hideSuggest();
+  }
+});
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".autocomplete")) hideSuggest();
+});
 $("grade").addEventListener("change", recalc);
 document.querySelectorAll('input[name="dep"]').forEach((r) => r.addEventListener("change", recalc));
 $("budget-slider").addEventListener("input", (e) => {
@@ -201,6 +288,6 @@ $("range-max").addEventListener("change", updateRange);
 $("beds").addEventListener("change", render);
 $("baths").addEventListener("change", render);
 
-loadBahData(2026)
-  .then((y) => { $("data-year").textContent = y; recalc(); })
-  .catch((e) => { $("bah-card").insertAdjacentHTML("beforeend", `<p class="hint">Failed to load BAH data: ${e.message}</p>`); });
+Promise.all([loadBahData(2026), loadPlaces()])
+  .then(([y]) => { $("data-year").textContent = y; recalc(); })
+  .catch((e) => { $("bah-card").insertAdjacentHTML("beforeend", `<p class="hint">Failed to load data: ${e.message}</p>`); });
