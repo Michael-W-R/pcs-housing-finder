@@ -3,6 +3,7 @@ import {
   loadPlaces, placeForZip, searchCities, zipsForCity,
   nearestZip, loadInstallations, searchInstallations,
 } from "./places.js";
+import { schoolsForState, nearestSchools } from "./schools.js";
 
 const $ = (id) => document.getElementById(id);
 const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -59,6 +60,64 @@ function clearCandidate() {
   if (candMarker) { candMarker.remove(); candMarker = null; }
   if (map.getSource("route")) drawRoute(EMPTY_ROUTE);
   $("commute-result").hidden = true;
+  $("schools-card").hidden = true;
+  drawSchoolDots([]);
+}
+
+const LEVEL_NAMES = { E: "Elementary", M: "Middle", H: "High", C: "K-12" };
+
+function drawSchoolDots(schools) {
+  const data = {
+    type: "FeatureCollection",
+    features: schools.map((s) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [s.lng, s.lat] },
+      properties: { lv: s.lv },
+    })),
+  };
+  const src = map.getSource("schools");
+  if (src) {
+    src.setData(data);
+  } else if (schools.length) {
+    map.addSource("schools", { type: "geojson", data });
+    map.addLayer({
+      id: "schools-dots", type: "circle", source: "schools",
+      paint: {
+        "circle-radius": 5,
+        "circle-color": ["match", ["get", "lv"], "E", "#2e7d32", "M", "#b4530a", "H", "#6d28d9", "#607d8b"],
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-width": 1.5,
+      },
+    });
+  }
+}
+
+async function updateSchools(c, st) {
+  const all = await schoolsForState(st);
+  if (!state.candidate || state.candidate.lng !== c.lng || state.candidate.lat !== c.lat) return;
+  const near = nearestSchools(all, c.lat, c.lng);
+  $("schools-card").hidden = near.length === 0;
+  const list = $("schools-list");
+  list.innerHTML = "";
+  for (const s of near) {
+    const row = document.createElement("div");
+    row.className = "school-row";
+    const left = document.createElement("span");
+    const dot = document.createElement("span");
+    dot.className = `lv-dot lv-${s.lv}`;
+    const a = document.createElement("a");
+    a.href = `https://www.greatschools.org/search/search.page?q=${encodeURIComponent(`${s.n} ${s.c}`)}`;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = s.n;
+    left.append(dot, a);
+    const meta = document.createElement("span");
+    meta.className = "school-meta";
+    meta.textContent = `${LEVEL_NAMES[s.lv]} · ${s.mi.toFixed(1)} mi`;
+    row.append(left, meta);
+    list.appendChild(row);
+  }
+  drawSchoolDots(near);
 }
 
 function milesText(meters) { return `${(meters / 1609.34).toFixed(1)} mi`; }
@@ -88,6 +147,7 @@ async function routeToCandidate() {
   const nearZip = nearestZip(c.lat, c.lng);
   const nearPlace = nearZip ? placeForZip(nearZip) : null;
   const fromTxt = nearPlace ? `near ${nearPlace.city}, ${nearPlace.st} ${nearZip}` : "the selected point";
+  if (nearPlace) updateSchools(c, nearPlace.st);
   $("commute-result").hidden = false;
   $("commute-main").textContent = "…";
   $("commute-sub").textContent = `Checking drive from ${fromTxt}`;

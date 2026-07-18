@@ -231,6 +231,34 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
 .bb-field { flex: 1; }
 .bb-field label { margin-top: 0; }
 
+.school-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 0.85rem;
+}
+
+.school-row:last-child { border-bottom: none; }
+.school-row a { color: var(--navy); font-weight: 600; text-decoration: none; }
+.school-row a:hover { text-decoration: underline; }
+.school-meta { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+
+.lv-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+}
+
+.lv-E { background: #2e7d32; }
+.lv-M { background: #b4530a; }
+.lv-H { background: #6d28d9; }
+.lv-C { background: #607d8b; }
+
 .link-row { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .listing-link {
