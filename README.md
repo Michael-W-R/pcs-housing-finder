@@ -28,6 +28,13 @@ OpenStreetMap tiles. Python powers the data pipeline. Deploys as a static site
   `data/raw/`, extract `US.txt`, then run `py tools/build_places_data.py`.
   Powers city autocomplete, offline map centering, and listing-site URL slugs.
 
+## Docs
+
+- [docs/STYLING.md](docs/STYLING.md) — where every color, label, font, and
+  layout value lives, with a cookbook for common changes.
+- [docs/GITHUB-PRIMER.md](docs/GITHUB-PRIMER.md) — plain-English guide to how
+  this repo, commits, and the auto-deploy pipeline work.
+
 ## Run locally
 
 Any static file server over `web/`, e.g.: `py -m http.server 8080 -d web`
