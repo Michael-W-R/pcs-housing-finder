@@ -4,6 +4,7 @@ import {
   nearestZip, loadInstallations, searchInstallations,
 } from "./places.js";
 import { schoolsForState, nearestSchools, prettySchoolName } from "./schools.js";
+import { TOMTOM_KEY } from "./config.js";
 
 const $ = (id) => document.getElementById(id);
 const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
@@ -20,21 +21,77 @@ const state = {
 };
 
 // --- Map ---------------------------------------------------------------
+// OpenFreeMap "Liberty" — free, keyless vector basemap (openfreemap.org).
+// Attribution comes with the style itself.
+const LIBERTY_STYLE = "https://tiles.openfreemap.org/styles/liberty";
+
+// Esri imagery + transportation/labels reference tiles (free with attribution).
+const esriTiles = (path) =>
+  `https://server.arcgisonline.com/ArcGIS/rest/services/${path}/MapServer/tile/{z}/{y}/{x}`;
+const SATELLITE_STYLE = {
+  version: 8,
+  sources: {
+    imagery: {
+      type: "raster", tiles: [esriTiles("World_Imagery")], tileSize: 256,
+      attribution: "© Esri, Maxar, Earthstar Geographics",
+    },
+    roads: { type: "raster", tiles: [esriTiles("Reference/World_Transportation")], tileSize: 256 },
+    labels: { type: "raster", tiles: [esriTiles("Reference/World_Boundaries_and_Places")], tileSize: 256 },
+  },
+  layers: [
+    { id: "imagery", type: "raster", source: "imagery" },
+    { id: "roads", type: "raster", source: "roads" },
+    { id: "labels", type: "raster", source: "labels" },
+  ],
+};
+
 const map = new maplibregl.Map({
   container: "map",
-  // OpenFreeMap "Liberty" — free, keyless vector basemap (openfreemap.org).
-  // Attribution comes with the style itself.
-  style: "https://tiles.openfreemap.org/styles/liberty",
+  style: LIBERTY_STYLE,
   center: [-98.5, 39.8],
   zoom: 4,
 });
 map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+let satellite = false;
+
+class BasemapToggle {
+  onAdd() {
+    this._container = document.createElement("div");
+    this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "basemap-toggle";
+    btn.textContent = "Satellite";
+    btn.addEventListener("click", () => {
+      satellite = !satellite;
+      btn.textContent = satellite ? "Map" : "Satellite";
+      map.setStyle(satellite ? SATELLITE_STYLE : LIBERTY_STYLE);
+    });
+    this._container.appendChild(btn);
+    return this._container;
+  }
+  onRemove() { this._container.remove(); }
+}
+map.addControl(new BasemapToggle(), "top-right");
+
+// setStyle wipes custom sources/layers (markers survive) — re-add our
+// overlays whenever a new style finishes loading.
+let lastZone = null;
+let lastRouteFeature = null;
+let lastSchoolList = [];
+map.on("style.load", () => {
+  if (lastZone) drawFairZone(lastZone);
+  if (lastRouteFeature) drawRoute(lastRouteFeature);
+  if (lastSchoolList.length) drawSchoolDots(lastSchoolList);
+});
 let dutyMarker = null;
 let candMarker = null;
 
 const EMPTY_ROUTE = { type: "Feature", geometry: { type: "LineString", coordinates: [] } };
 
 function drawRoute(feature) {
+  lastRouteFeature = feature;
   const src = map.getSource("route");
   if (src) {
     src.setData(feature);
@@ -58,6 +115,7 @@ function clearCandidate() {
   if (candMarker) { candMarker.remove(); candMarker = null; }
   if (map.getSource("route")) drawRoute(EMPTY_ROUTE);
   $("commute-result").hidden = true;
+  $("commute-traffic").hidden = true;
   $("schools-card").hidden = !state.anchor;
   if (state.anchor) schoolsPlaceholder();
   drawSchoolDots([]);
@@ -66,6 +124,7 @@ function clearCandidate() {
 const LEVEL_NAMES = { E: "Elementary", M: "Middle", H: "High", C: "K-12" };
 
 function drawSchoolDots(schools) {
+  lastSchoolList = schools;
   const data = {
     type: "FeatureCollection",
     features: schools.map((s) => ({
@@ -131,6 +190,55 @@ function haversineMeters(a, b) {
   return 2 * R * Math.asin(Math.sqrt(s));
 }
 
+// --- Rush-hour times via TomTom (only when a key is configured) ---------
+
+const trafficCache = new Map();
+
+function nextWeekdayAt(hour, minute) {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+}
+
+function isoLocal(d) {
+  const off = -d.getTimezoneOffset();
+  const p = (n) => String(Math.floor(Math.abs(n))).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` +
+    `T${p(d.getHours())}:${p(d.getMinutes())}:00${off >= 0 ? "+" : "-"}${p(off / 60)}:${p(off % 60)}`;
+}
+
+async function tomtomMinutes(from, to, departAt) {
+  const key = `${from.lng.toFixed(3)},${from.lat.toFixed(3)}|${to.lng.toFixed(3)},${to.lat.toFixed(3)}|${departAt.getHours()}`;
+  if (trafficCache.has(key)) return trafficCache.get(key);
+  const url = `https://api.tomtom.com/routing/1/calculateRoute/` +
+    `${from.lat},${from.lng}:${to.lat},${to.lng}/json` +
+    `?key=${TOMTOM_KEY}&traffic=true&departAt=${encodeURIComponent(isoLocal(departAt))}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`tomtom ${resp.status}`);
+  const j = await resp.json();
+  const mins = Math.round(j.routes[0].summary.travelTimeInSeconds / 60);
+  trafficCache.set(key, mins);
+  return mins;
+}
+
+async function updateRushHour(c) {
+  const el = $("commute-traffic");
+  if (!TOMTOM_KEY || !state.anchor) { el.hidden = true; return; }
+  try {
+    const [am, pm] = await Promise.all([
+      tomtomMinutes(c, state.anchor, nextWeekdayAt(7, 30)),
+      tomtomMinutes(c, state.anchor, nextWeekdayAt(17, 15)),
+    ]);
+    if (state.candidate !== c) return; // superseded by a newer click
+    el.hidden = false;
+    el.textContent = `Rush hour: ~${am} min at 7:30 AM · ~${pm} min at 5:15 PM`;
+  } catch {
+    el.hidden = true; // quota/network issues — quietly fall back
+  }
+}
+
 async function fetchRoute(from, to) {
   const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`;
   const resp = await fetch(url);
@@ -148,6 +256,7 @@ async function routeToCandidate() {
   const nearPlace = nearZip ? placeForZip(nearZip) : null;
   const fromTxt = nearPlace ? `near ${nearPlace.city}, ${nearPlace.st} ${nearZip}` : "the selected point";
   if (nearPlace) updateSchools(c, nearPlace.st);
+  updateRushHour(c);
   $("commute-result").hidden = false;
   // On phones the panel sits under the map — bring the result into view.
   if (window.matchMedia("(max-width: 800px)").matches) {
@@ -182,6 +291,7 @@ async function routeToCandidate() {
 const EMPTY_ZONE = { type: "FeatureCollection", features: [] };
 
 function drawFairZone(feature) {
+  lastZone = feature;
   const src = map.getSource("fairzone");
   const data = feature ?? EMPTY_ZONE;
   if (src) {
@@ -296,7 +406,25 @@ function placeAnchor2(lngLat) {
   if (state.candidate) routeToCandidate();
 }
 
+// Ignore clicks while the camera is flying to a newly picked duty station —
+// a click mid-animation would drop the pin at a transient location.
+let cameraSettling = false;
+let settleTimer = null;
+let flyTarget = null;
+map.on("moveend", () => {
+  clearTimeout(settleTimer);
+  settleTimer = setTimeout(() => { cameraSettling = false; }, 300);
+});
+
 map.on("click", (e) => {
+  if (cameraSettling) {
+    // The click's mousedown cancelled the flight partway — resume it.
+    if (flyTarget) {
+      cameraSettling = true;
+      map.flyTo({ ...flyTarget, maxDuration: 1500 });
+    }
+    return;
+  }
   if (state.placing2) placeAnchor2(e.lngLat);
   else if (state.anchor) setCandidate(e.lngLat);
 });
@@ -319,7 +447,9 @@ function placeDutyMarker(lngLat, label, popupHtml, zoom) {
   $("commute-card").hidden = false;
   $("schools-card").hidden = false;
   schoolsPlaceholder();
-  map.flyTo({ center: lngLat, zoom });
+  cameraSettling = true;
+  flyTarget = { center: lngLat, zoom };
+  map.flyTo({ ...flyTarget, maxDuration: 2500 });
   dutyMarker.togglePopup();
   scheduleFairZone();
 }

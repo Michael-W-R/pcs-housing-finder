@@ -148,6 +148,15 @@ input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--
 .commute-result { text-align: center; margin-top: 0.3rem; }
 .commute-main { font-size: 1.35rem; font-weight: 800; color: var(--navy); }
 .commute-sub { font-size: 0.78rem; color: var(--muted); margin-top: 0.25rem; }
+.commute-traffic { font-size: 0.85rem; font-weight: 600; color: var(--warn); margin-top: 0.35rem; }
+
+.basemap-toggle {
+  width: auto !important;
+  padding: 0 9px !important;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+}
 
 .mha-line { margin-top: 0.35rem; font-size: 0.85rem; color: var(--navy); font-weight: 600; }
 .mha-code { color: var(--muted); font-weight: 400; }
