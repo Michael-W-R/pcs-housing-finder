@@ -446,7 +446,12 @@ function render() {
     ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${searchZip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
     : "https://www.apartments.com/";
 
-  $("link-mbo").href = `https://www.militarybyowner.com/homes?type=rent&location=${searchZip}`;
+  // MilitaryByOwner's real search URLs are /{state}/homes-in-{zip}/?LsType=R
+  // (found via their GetAutoURL endpoint; the /homes?location= guess showed
+  // an empty page).
+  $("link-mbo").href = p
+    ? `https://www.militarybyowner.com/${p.st.toLowerCase()}/homes-in-${searchZip}/?LsType=R`
+    : "https://www.militarybyowner.com/";
 }
 
 // The location box accepts a 5-digit ZIP directly, or holds a picked city
