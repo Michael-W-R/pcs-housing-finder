@@ -1,5 +1,5 @@
 :root {
-  --army-gold: #EDB31B;
+  --army-gold: #FFCC01;
   --black: #000000;
   --blue: #0000FF;
   --navy: #1b2a41;
@@ -109,7 +109,7 @@ input[type="text"], input[inputmode], select {
   background: #fff;
 }
 
-input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--gold); }
+input:focus, select:focus { outline: 2px solid var(--army-gold); border-color: var(--army-gold); }
 
 .autocomplete { position: relative; }
 
@@ -199,7 +199,7 @@ input:focus, select:focus { outline: 2px solid var(--gold); border-color: var(--
   font-weight: 600;
 }
 
-input[type="range"] { width: 100%; accent-color: var(--gold); }
+input[type="range"] { width: 100%; accent-color: var(--army-gold); }
 
 .slider-scale {
   display: flex;
