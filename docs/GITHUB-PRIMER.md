@@ -79,7 +79,7 @@ Open **https://github.com/Michael-W-R/pcs-housing-finder** and you'll see:
 
 | What | URL |
 |------|-----|
-| The live site | https://michael-w-r.github.io/pcs-housing-finder/ |
+| The live site | https://pcsscout.com (the old michael-w-r.github.io/pcs-housing-finder/ address redirects here) |
 | The repo (files + README) | https://github.com/Michael-W-R/pcs-housing-finder |
 | Change history | https://github.com/Michael-W-R/pcs-housing-finder/commits/main |
 | Deploy history | https://github.com/Michael-W-R/pcs-housing-finder/actions |

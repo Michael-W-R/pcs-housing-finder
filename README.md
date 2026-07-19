@@ -1,4 +1,4 @@
-# PCS Housing Finder
+# PCS Scout — [pcsscout.com](https://pcsscout.com)
 
 BAH-smart rental search for military Service Members and Families during PCS moves.
 
