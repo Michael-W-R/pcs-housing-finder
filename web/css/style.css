@@ -37,18 +37,13 @@ body {
   flex: none;
 }
 
-.brand { display: flex; align-items: baseline; gap: 0.5rem; }
+.brand { display: flex; align-items: center; gap: 0.6rem; }
 
-.brand-mark {
-  background: var(--army-gold);
-  color: var(--navy-deep);
-  font-weight: 800;
-  padding: 0.1rem 0.45rem;
-  border-radius: 4px;
-  letter-spacing: 0.05em;
-}
+.brand-logo { height: 34px; display: block; }
 
-.brand-name { font-weight: 700; font-size: 1.15rem; }
+.brand-name { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.02em; }
+
+.brand-gold { color: var(--army-gold); }
 
 .tagline { color: #b9c2d0; font-size: 0.85rem; }
 
@@ -298,6 +293,7 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
 .listing-link:hover { background: var(--navy); color: #fff; }
 
 .about-card { position: relative; }
+.about-logo { display: block; width: 56px; margin: 0 auto 0.4rem; }
 .about-card p { margin: 0 0 0.5rem; font-size: 0.85rem; }
 
 .about-close {
