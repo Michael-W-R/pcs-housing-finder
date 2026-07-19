@@ -27,26 +27,40 @@ body {
   flex-direction: column;
 }
 
+/* Header mirrors the layout below it: the brand sits centered over the
+   card column, the tagline centered over the map. */
 .topbar {
   background: var(--black);
   color: #fff;
-  padding: 0.35rem 1rem 0.15rem;
+  padding: 0.4rem 1rem 0.3rem 0; /* no left pad: zones align to panel/map */
   display: flex;
   align-items: center;
   flex: none;
 }
 
+.brand-zone {
+  width: 380px;
+  flex: none;
+  display: flex;
+  justify-content: center;
+}
+
+.tagline-zone {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
 .brand { display: flex; align-items: center; gap: 0.7rem; }
 
-.brand-logo { height: 44px; display: block; }
+.brand-logo { height: 52px; display: block; }
 
-.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-
-.brand-name { font-weight: 800; font-size: 1.6rem; letter-spacing: 0.02em; }
+.brand-name { font-weight: 800; font-size: 1.9rem; letter-spacing: 0.02em; }
 
 .brand-gold { color: var(--army-gold); }
 
-.tagline { color: #b9c2d0; font-size: 0.85rem; }
+.tagline { color: #b9c2d0; font-size: 1rem; letter-spacing: 0.01em; }
 
 .layout {
   flex: 1;
@@ -392,9 +406,10 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
     padding: 0.75rem;
   }
   .topbar { padding: 0.5rem 0.85rem; justify-content: center; }
-  .brand-logo { height: 38px; }
-  .brand-name { font-size: 1.35rem; }
-  .tagline { display: none; }
+  .brand-zone { width: auto; }
+  .tagline-zone { display: none; }
+  .brand-logo { height: 40px; }
+  .brand-name { font-size: 1.45rem; }
   .bah-amount { font-size: 1.8rem; }
   .suggest button { padding: 0.65rem 0.6rem; }
   .mode-btn, .listing-link { padding: 0.65rem 0.5rem; }
