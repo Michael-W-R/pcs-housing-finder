@@ -6,10 +6,16 @@ PCS Scout is a public-facing tool I built to help Service Members and Families q
 PCS moves are stressful, and Families often struggle to find reliable rental information near their gaining duty station. Existing tools are fragmented across multiple commercial sites. PCS Scout consolidates key information into a single, clean interface that is easy to use on both desktop and mobile.
 
 ## What It Does
-- Provides BAH-smart rental search based on ZIP code, pay grade, and dependency status  
-- Displays official DoD BAH rates in a simple, interactive map  
-- Offers pre-filtered rental links to major listing sites  
-- Helps Families quickly estimate realistic housing options before arrival  
+PCS Scout delivers a comprehensive, BAH‑smart rental search experience tailored specifically for military Service Members and Families navigating PCS moves. Core capabilities include:
+
+-Location‑based rental search using ZIP code, installation, or city
+-Interactive BAH visualization showing official DoD rates by ZIP, pay grade, and dependency status
+--Pin‑drop commute estimation for a Service Member’s workplace
+-Dual‑commute mapping for spouse or Family member employment locations
+-School proximity insights, displaying the two closest elementary, middle, and high schools with direct links to GreatSchools reviews
+-Pre‑filtered rental listings from major housing platforms
+-BAH‑based budget filtering, allowing users to adjust by percentage or dollar amount to refine affordability
+-Realistic housing expectation tools that help Families understand commute times, school options, and rental affordability before arrival
 
 ## My Role
 I designed, developed, and deployed the entire project:
