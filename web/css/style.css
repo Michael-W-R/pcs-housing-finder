@@ -30,18 +30,19 @@ body {
 .topbar {
   background: var(--black);
   color: #fff;
-  padding: 0.6rem 1.25rem;
+  padding: 0.7rem 1.25rem;
   display: flex;
-  align-items: baseline;
-  gap: 1rem;
+  align-items: center;
   flex: none;
 }
 
-.brand { display: flex; align-items: center; gap: 0.6rem; }
+.brand { display: flex; align-items: center; gap: 0.8rem; }
 
-.brand-logo { height: 34px; display: block; }
+.brand-logo { height: 48px; display: block; }
 
-.brand-name { font-weight: 800; font-size: 1.25rem; letter-spacing: 0.02em; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+
+.brand-name { font-weight: 800; font-size: 1.7rem; letter-spacing: 0.02em; }
 
 .brand-gold { color: var(--army-gold); }
 
@@ -373,7 +374,9 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
     min-height: 0;
     padding: 0.75rem;
   }
-  .topbar { padding: 0.5rem 0.85rem; }
+  .topbar { padding: 0.5rem 0.85rem; justify-content: center; }
+  .brand-logo { height: 38px; }
+  .brand-name { font-size: 1.35rem; }
   .tagline { display: none; }
   .bah-amount { font-size: 1.8rem; }
   .suggest button { padding: 0.65rem 0.6rem; }
