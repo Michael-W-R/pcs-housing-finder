@@ -1,3 +1,33 @@
+# PCS Scout — Project Overview (ASWF Portfolio Summary)
+
+PCS Scout is a public-facing tool I built to help Service Members and Families quickly identify rental options during PCS moves. I created this project end-to-end — from concept, design, and data modeling to front-end development and deployment — to demonstrate my ability to build intuitive, mission-focused digital products that solve real problems for Service Members and Families.
+
+## Why I Built It
+PCS moves are stressful, and Families often struggle to find reliable rental information near their gaining duty station. Existing tools are fragmented across multiple commercial sites. PCS Scout consolidates key information into a single, clean interface that is easy to use on both desktop and mobile.
+
+## What It Does
+- Provides BAH-smart rental search based on ZIP code, pay grade, and dependency status  
+- Displays official DoD BAH rates in a simple, interactive map  
+- Offers pre-filtered rental links to major listing sites  
+- Helps Families quickly estimate realistic housing options before arrival  
+
+## My Role
+I designed, developed, and deployed the entire project:
+- UI/UX design and workflow mapping  
+- Front-end development (HTML/CSS/JS)  
+- Data pipeline creation (Python)  
+- Hosting and domain configuration  
+- Continuous iteration based on user feedback  
+
+## Why This Matters for ASWF
+PCS Scout demonstrates:
+- My ability to identify a real Soldier problem  
+- My initiative in building a complete solution independently  
+- My product design and user experience skills  
+- My technical curiosity and willingness to learn new tools  
+- My commitment to building solutions that scale beyond a single unit  
+
+----------------------------------------------------------------------------------------
 # PCS Scout — [pcsscout.com](https://pcsscout.com)
 
 BAH-smart rental search for military Service Members and Families during PCS moves.
