@@ -1,6 +1,6 @@
 # PCS Scout — Project Overview (ASWF Portfolio Summary)
 
-PCS Scout is a public-facing tool I built to help Service Members and Families quickly identify rental options during PCS moves. I created this project end-to-end — from concept, design, and data modeling to front-end development and deployment — to demonstrate my ability to build intuitive, mission-focused digital products that solve real problems for Service Members and Families.
+PCS Scout is a public-facing tool I built to help Service Members and Families quickly identify rental options during PCS moves. I created this project end-to-end -- from concept, design, and data modeling to front-end development and deployment -- to demonstrate my ability to build intuitive, mission-focused digital products that solve real problems for Service Members and Families.
 
 ## Why I Built It
 PCS moves are stressful, and Families often struggle to find reliable rental information near their gaining duty station. Existing tools are fragmented across multiple commercial sites. PCS Scout consolidates key information into a single, clean interface that is easy to use on both desktop and mobile.
