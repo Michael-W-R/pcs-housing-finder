@@ -779,6 +779,37 @@ $("add-anchor2").addEventListener("click", () => {
   }
 });
 
+// --- First-visit welcome modal -----------------------------------------
+
+const ABOUT_KEY = "pcsscout-about-dismissed";
+
+function initAboutModal() {
+  let seen = false;
+  try { seen = !!localStorage.getItem(ABOUT_KEY); } catch { /* private mode */ }
+  if (seen) return;
+  const card = $("about-card");
+  const backdrop = $("about-backdrop");
+  backdrop.hidden = false;
+  card.classList.add("modalized");
+  const close = () => {
+    try { localStorage.setItem(ABOUT_KEY, "1"); } catch { /* private mode */ }
+    card.classList.add("closing");
+    backdrop.classList.add("fading");
+    document.removeEventListener("keydown", onKey);
+    setTimeout(() => {
+      card.classList.remove("modalized", "closing");
+      backdrop.hidden = true;
+      backdrop.classList.remove("fading");
+    }, 260);
+  };
+  const onKey = (e) => { if (e.key === "Escape") close(); };
+  $("about-close").addEventListener("click", close);
+  backdrop.addEventListener("click", close);
+  document.addEventListener("keydown", onKey);
+}
+
+initAboutModal();
+
 Promise.all([loadBahData(2026), loadPlaces(), loadInstallations()])
   .then(([y]) => { $("data-year").textContent = y; recalc(); })
   .catch((e) => { $("bah-card").insertAdjacentHTML("beforeend", `<p class="hint">Failed to load data: ${e.message}</p>`); });

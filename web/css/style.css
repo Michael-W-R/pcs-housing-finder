@@ -296,7 +296,57 @@ input[type="range"] { width: 100%; accent-color: var(--gold); }
 
 .listing-link:hover { background: var(--navy); color: #fff; }
 
+.about-card { position: relative; }
 .about-card p { margin: 0 0 0.5rem; font-size: 0.85rem; }
+
+.about-close {
+  display: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  border: none;
+  background: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+
+.about-close:hover { color: var(--navy); }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.65);
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.fading { opacity: 0; }
+
+/* First-visit welcome state: the about card floats centered over the page,
+   then settles back into its normal panel slot on dismiss. */
+.about-card.modalized {
+  position: fixed;
+  z-index: 50;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, 92vw);
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow-y: auto;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.about-card.modalized .about-close { display: block; }
+
+.about-card.modalized.closing {
+  transform: translate(-50%, 30%) scale(0.5);
+  opacity: 0;
+}
 
 .about-card ol {
   margin: 0;
