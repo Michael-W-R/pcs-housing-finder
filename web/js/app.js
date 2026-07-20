@@ -50,8 +50,22 @@ const map = new maplibregl.Map({
   style: LIBERTY_STYLE,
   center: [-98.5, 39.8],
   zoom: 4,
+  // Collapse the data credits to an (i) button that expands on click —
+  // the license still requires the attribution to be reachable.
+  attributionControl: { compact: true },
 });
 map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+// MapLibre renders the compact attribution *expanded* on load and re-expands
+// it whenever the style or size changes; collapse it back to the (i) button.
+function collapseAttribution() {
+  map.getContainer()
+    .querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show")
+    ?.classList.remove("maplibregl-compact-show");
+}
+map.on("load", collapseAttribution);
+map.on("style.load", collapseAttribution);
+map.on("resize", collapseAttribution);
 
 let satellite = false;
 
