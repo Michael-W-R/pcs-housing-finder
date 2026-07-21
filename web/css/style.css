@@ -426,23 +426,27 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
   gap: 0.3rem;
 }
 
-.panel-footer {
-  font-size: 0.7rem;
-  color: var(--muted);
-  padding: 0 0.25rem 0.25rem;
-  line-height: 1.45;
-}
-
-.panel-footer p { margin: 0 0 0.5rem; }
-.panel-footer p:last-child { margin-bottom: 0; }
-.panel-footer strong { color: #8b93a1; }
-.panel-footer a { color: #8b93a1; }
-
-.panel-footer .copyright {
-  padding-top: 0.4rem;
-  border-top: 1px solid #1f1f1f;
+/* Page-level footer: centered across the full width, under both columns. */
+.site-footer {
+  flex: none;
+  text-align: center;
+  font-size: 0.72rem;
   color: #7b828f;
+  padding: 0.5rem 1rem 0.6rem;
+  background: var(--black);
 }
+
+/* Source credits and disclaimer live in the About card (GeoNames CC BY 4.0
+   and OSM require visible attribution). */
+.about-fine {
+  margin: 0.6rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.about-fine strong { color: var(--ink); }
+.about-fine a { color: var(--muted); }
 
 @media (max-width: 800px) {
   .layout { flex-direction: column; }

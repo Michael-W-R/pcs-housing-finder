@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <!-- ?v= is a cache-buster: bump it whenever style.css or app.js changes so
      browsers can't pair new HTML with a stale stylesheet/script. -->
-<link rel="stylesheet" href="css/style.css?v=3">
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 <header class="topbar">
@@ -168,23 +168,20 @@
         <li>Tap the map to compare commutes — including rush hour — and see nearby schools. Add a spouse's workplace to find the area that's fair to both drives.</li>
         <li>Jump to listing sites pre-filtered to your area, budget, and home size.</li>
       </ol>
+      <p class="about-fine"><strong>Not an official DoD resource</strong> — estimates for planning only; verify with your finance and housing offices. Data: DoD DTMO, NCES, U.S. Census TIGER (public domain) · © <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0) · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>/OpenFreeMap · © Esri · OSRM &amp; © TomTom.</p>
     </section>
 
-    <footer class="panel-footer">
-      <p><strong>Data sources:</strong> BAH rates — DoD Defense Travel Management Office (public domain). Schools — U.S. Dept. of Education NCES (public domain). Places — © <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Installations — U.S. Census Bureau TIGER (public domain). Maps — © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors / OpenFreeMap. Satellite imagery — © Esri. Drive times — OSRM &amp; © TomTom.</p>
-      <p><strong>Not an official DoD resource.</strong> PCS Scout is an independent tool and is not affiliated with, endorsed by, or sponsored by the U.S. Department of Defense, the Department of the Army, or any military service or installation.</p>
-      <p><strong>Planning use only.</strong> BAH amounts, drive times, school listings, and rental links are estimates drawn from third-party and government data that may be outdated or incomplete. Verify your BAH entitlement with your finance office and your housing options with your installation housing office before making any decision.</p>
-      <p class="copyright">© 2026 PCS Scout. All rights reserved.</p>
-    </footer>
   </aside>
 
   <div id="map"></div>
 </main>
 
+<footer class="site-footer">© 2026 PCS Scout. All rights reserved.</footer>
+
 <div class="modal-backdrop" id="about-backdrop" hidden></div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-<script type="module" src="js/app.js?v=3"></script>
+<script type="module" src="js/app.js?v=4"></script>
 </body>
 </html>
