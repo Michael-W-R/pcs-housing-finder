@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <!-- ?v= is a cache-buster: bump it whenever style.css or app.js changes so
      browsers can't pair new HTML with a stale stylesheet/script. -->
-<link rel="stylesheet" href="css/style.css?v=2">
+<link rel="stylesheet" href="css/style.css?v=3">
 </head>
 <body>
 <header class="topbar">
@@ -171,7 +171,10 @@
     </section>
 
     <footer class="panel-footer">
-      <p>BAH data: official DTMO ASCII files (public domain). Location data © <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). This site is not affiliated with or endorsed by the Department of Defense. Verify rates with your finance office.</p>
+      <p><strong>Data sources:</strong> BAH rates — DoD Defense Travel Management Office (public domain). Schools — U.S. Dept. of Education NCES (public domain). Places — © <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0). Installations — U.S. Census Bureau TIGER (public domain). Maps — © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors / OpenFreeMap. Satellite imagery — © Esri. Drive times — OSRM &amp; © TomTom.</p>
+      <p><strong>Not an official DoD resource.</strong> PCS Scout is an independent tool and is not affiliated with, endorsed by, or sponsored by the U.S. Department of Defense, the Department of the Army, or any military service or installation.</p>
+      <p><strong>Planning use only.</strong> BAH amounts, drive times, school listings, and rental links are estimates drawn from third-party and government data that may be outdated or incomplete. Verify your BAH entitlement with your finance office and your housing options with your installation housing office before making any decision.</p>
+      <p class="copyright">© 2026 PCS Scout. All rights reserved.</p>
     </footer>
   </aside>
 
@@ -182,6 +185,6 @@
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-<script type="module" src="js/app.js?v=2"></script>
+<script type="module" src="js/app.js?v=3"></script>
 </body>
 </html>

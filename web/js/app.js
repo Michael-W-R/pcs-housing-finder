@@ -56,6 +56,48 @@ const map = new maplibregl.Map({
 });
 map.addControl(new maplibregl.NavigationControl(), "top-right");
 
+// On desktop, end the map level with the bottom of the last card instead of
+// running to the viewport floor. Falls back to full height once the cards
+// outgrow the screen, and is disabled on mobile (fixed-height map there).
+function syncMapHeight() {
+  const mapEl = document.getElementById("map");
+  const panel = document.querySelector(".panel");
+  const layout = document.querySelector(".layout");
+  if (!mapEl || !panel || !layout) return;
+
+  if (window.matchMedia("(max-width: 800px)").matches) {
+    mapEl.style.height = "";
+    map.resize();
+    return;
+  }
+
+  const style = getComputedStyle(panel);
+  const padTop = parseFloat(style.paddingTop);
+  const padBottom = parseFloat(style.paddingBottom);
+  const gap = parseFloat(style.rowGap) || 16;
+  const footer = panel.querySelector(".panel-footer");
+  const footerBlock = footer ? footer.offsetHeight + gap : 0;
+
+  // Height of the stack of cards alone (panel content minus footer/padding).
+  const cardsHeight = panel.scrollHeight - padTop - padBottom - footerBlock;
+  const maxHeight = layout.clientHeight - 32; // the map's 1rem top/bottom margins
+  const target = Math.max(320, Math.min(cardsHeight, maxHeight));
+
+  if (Math.abs(parseFloat(mapEl.style.height || "0") - target) > 1) {
+    mapEl.style.height = `${target}px`;
+    map.resize();
+  }
+}
+
+// Recompute when cards appear/disappear or the window changes.
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(() => syncMapHeight());
+  ro.observe(document.querySelector(".panel"));
+  document.querySelectorAll(".panel .card").forEach((c) => ro.observe(c));
+}
+window.addEventListener("resize", syncMapHeight);
+map.on("load", syncMapHeight);
+
 // MapLibre renders the compact attribution *expanded* on load and re-expands
 // it whenever the style or size changes; collapse it back to the (i) button.
 function collapseAttribution() {
@@ -814,6 +856,7 @@ function initAboutModal() {
       card.classList.remove("modalized", "closing");
       backdrop.hidden = true;
       backdrop.classList.remove("fading");
+      syncMapHeight(); // the card rejoins the panel flow
     }, 260);
   };
   const onKey = (e) => { if (e.key === "Escape") close(); };

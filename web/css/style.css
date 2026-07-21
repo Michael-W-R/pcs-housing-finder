@@ -426,7 +426,23 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
   gap: 0.3rem;
 }
 
-.panel-footer { font-size: 0.7rem; color: var(--muted); padding: 0 0.25rem; }
+.panel-footer {
+  font-size: 0.7rem;
+  color: var(--muted);
+  padding: 0 0.25rem 0.25rem;
+  line-height: 1.45;
+}
+
+.panel-footer p { margin: 0 0 0.5rem; }
+.panel-footer p:last-child { margin-bottom: 0; }
+.panel-footer strong { color: #8b93a1; }
+.panel-footer a { color: #8b93a1; }
+
+.panel-footer .copyright {
+  padding-top: 0.4rem;
+  border-top: 1px solid #1f1f1f;
+  color: #7b828f;
+}
 
 @media (max-width: 800px) {
   .layout { flex-direction: column; }
