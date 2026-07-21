@@ -258,11 +258,14 @@ function nextWeekdayAt(hour, minute) {
   return d;
 }
 
-function isoLocal(d) {
-  const off = -d.getTimezoneOffset();
-  const p = (n) => String(Math.floor(Math.abs(n))).padStart(2, "0");
+// Deliberately emits NO timezone offset: TomTom then reads the timestamp as
+// local time at the route's origin. Stamping the browser's offset made
+// "8:30 AM" mean 8:30 in the *user's* zone — e.g. 1:30 AM in Austin for a
+// user in Europe — which returned empty-road times identical to free-flow.
+function isoLocalNaive(d) {
+  const p = (n) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}` +
-    `T${p(d.getHours())}:${p(d.getMinutes())}:00${off >= 0 ? "+" : "-"}${p(off / 60)}:${p(off % 60)}`;
+    `T${p(d.getHours())}:${p(d.getMinutes())}:00`;
 }
 
 async function tomtomRoute(from, to, departAt) {
@@ -270,7 +273,7 @@ async function tomtomRoute(from, to, departAt) {
   if (trafficCache.has(key)) return trafficCache.get(key);
   const url = `https://api.tomtom.com/routing/1/calculateRoute/` +
     `${from.lat},${from.lng}:${to.lat},${to.lng}/json` +
-    `?key=${TOMTOM_KEY}&traffic=true&computeTravelTimeFor=all&departAt=${encodeURIComponent(isoLocal(departAt))}`;
+    `?key=${TOMTOM_KEY}&traffic=true&computeTravelTimeFor=all&departAt=${encodeURIComponent(isoLocalNaive(departAt))}`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`tomtom ${resp.status}`);
   const j = await resp.json();
@@ -297,7 +300,7 @@ async function updateRushHour(c) {
     ]);
     if (state.candidate !== c) return; // superseded by a newer click
     c._tomtomDone = true;
-    $("commute-main").textContent = `${milesText(am.meters)} · ~${am.typical} min typical`;
+    $("commute-main").textContent = `${milesText(am.meters)} · ~${am.typical} min off-peak`;
     el.hidden = false;
     el.textContent = `Rush hour: ~${am.traffic} min at 8:30 AM · ~${pm.traffic} min at 5:15 PM`;
   } catch {
