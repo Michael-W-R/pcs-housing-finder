@@ -150,6 +150,20 @@ drawn on top (markers, zones, routes) is unaffected by basemap swaps.
 
 ---
 
+## 6b. Cache-busting (important when editing CSS/JS)
+
+`index.html` links the stylesheet and script with a version query:
+
+```html
+<link rel="stylesheet" href="css/style.css?v=2">
+<script type="module" src="js/app.js?v=2"></script>
+```
+
+GitHub Pages caches files for 10 minutes, and HTML/CSS don't always refresh
+together — without this, a visitor can get **new HTML paired with an old
+stylesheet**, which breaks layouts in confusing ways. **Bump both numbers
+(`?v=3`, `?v=4`, …) whenever you change `style.css` or `app.js`.**
+
 ## 7. Workflow
 
 1. Edit files under `web/`.

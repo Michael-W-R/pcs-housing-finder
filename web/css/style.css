@@ -91,6 +91,17 @@ body {
   margin-right: 0.9rem;
 }
 
+/* Narrow laptops: keep the header to two tidy lines instead of wrapping. */
+@media (max-width: 1200px) {
+  .tagline { font-size: 1.15rem; }
+  .tagline-sub { font-size: 0.75rem; gap: 0.25rem 0.7rem; }
+  .tagline-sub span + span::before { margin-right: 0.7rem; }
+}
+
+@media (max-width: 1000px) {
+  .tagline-sub { display: none; }
+}
+
 .layout {
   flex: 1;
   display: flex;
