@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <!-- ?v= is a cache-buster: bump it whenever style.css or app.js changes so
      browsers can't pair new HTML with a stale stylesheet/script. -->
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 <header class="topbar">
@@ -43,6 +43,8 @@
         <input id="zip" maxlength="80" placeholder="e.g. Fort Riley, 78248, or San Antonio" autocomplete="off">
         <div class="suggest" id="suggest" hidden></div>
       </div>
+      <button class="link-btn" id="browse-toggle" type="button">Or browse installations by state — no typing needed</button>
+      <div class="browse-panel" id="browse-panel" hidden></div>
       <div class="mha-line" id="mha-line" hidden>
         <span id="mha-name"></span> <span class="mha-code" id="mha-code"></span>
       </div>
@@ -168,6 +170,7 @@
         <li>Tap the map to compare commutes — including rush hour — and see nearby schools. Add a spouse's workplace to find the area that's fair to both drives.</li>
         <li>Jump to listing sites pre-filtered to your area, budget, and home size.</li>
       </ol>
+      <p class="about-fine"><a href="privacy.html">Privacy Policy</a> · <a href="about.html">About PCS Scout</a></p>
       <p class="about-fine"><strong>Not an official DoD resource</strong> — estimates for planning only; verify with your finance and housing offices. Data: DoD DTMO, NCES, U.S. Census TIGER (public domain) · © <a href="https://www.geonames.org/" target="_blank" rel="noopener">GeoNames</a> (CC BY 4.0) · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>/OpenFreeMap · © Esri · OSRM &amp; © TomTom.</p>
     </section>
 
@@ -182,6 +185,6 @@
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-<script type="module" src="js/app.js?v=5"></script>
+<script type="module" src="js/app.js?v=6"></script>
 </body>
 </html>

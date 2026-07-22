@@ -81,6 +81,10 @@ export async function loadInstallations() {
   installations = await resp.json(); // pre-sorted by land area, biggest first
 }
 
+export function allInstallations() {
+  return installations ?? [];
+}
+
 export function searchInstallations(query, limit = 5) {
   const q = query.trim().toLowerCase();
   if (!installations || q.length < 2) return [];

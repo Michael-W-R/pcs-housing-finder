@@ -180,6 +180,68 @@ input:focus, select:focus { outline: 2px solid var(--army-gold); border-color: v
 
 .autocomplete { position: relative; }
 
+/* Mouse-only path to the same result as typing (also works where a network
+   policy disables keyboard input). Never replaces the type-ahead. */
+.link-btn {
+  display: block;
+  margin-top: 0.4rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--navy);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.browse-panel {
+  margin-top: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.5rem;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.browse-panel .browse-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 0.4rem;
+}
+
+.browse-grid { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+.browse-grid button {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 4px;
+  padding: 0.3rem 0.45rem;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.browse-grid button:hover { background: var(--paper); border-color: var(--army-gold); }
+
+.browse-list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px dashed var(--line);
+  background: none;
+  padding: 0.4rem 0.2rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.browse-list button:hover { background: var(--paper); }
+.browse-list button:last-child { border-bottom: none; }
+
 .suggest {
   position: absolute;
   top: 100%;
@@ -425,6 +487,27 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
   flex-direction: column;
   gap: 0.3rem;
 }
+
+/* Standalone document pages (privacy, about). */
+body.page { height: auto; min-height: 100vh; }
+body.page .topbar { padding: 0.4rem 1rem; }
+body.page .brand { text-decoration: none; color: inherit; }
+
+.doc {
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.doc .card { max-width: 760px; width: 100%; padding: 1.5rem 1.75rem; }
+.doc h1 { margin: 0 0 0.25rem; font-size: 1.6rem; color: var(--navy); }
+.doc h2 { margin: 1.4rem 0 0.4rem; font-size: 1rem; color: var(--navy); }
+.doc p, .doc li { font-size: 0.9rem; line-height: 1.6; }
+.doc ul { padding-left: 1.2rem; }
+.doc li { margin-bottom: 0.3rem; }
+.doc a { color: var(--navy); }
+.doc-date { color: var(--muted); font-size: 0.8rem !important; margin-top: 0; }
 
 /* Page-level footer: centered across the full width, under both columns. */
 .site-footer {
