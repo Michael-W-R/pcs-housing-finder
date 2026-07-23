@@ -635,7 +635,9 @@ function render() {
     ? `Searching around ${area} — your selected spot on the map.`
     : `Searching around your duty area (${searchZip}). Tap the map on a neighborhood to search there instead.`;
 
-  const citySlug = p ? `${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${searchZip}` : "";
+  const cityBase = p ? `${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}` : "";
+  const citySlug = p ? `${cityBase}-${searchZip}` : "";      // apartments.com: city-st-zip
+  const citySlugSlash = cityBase;                             // homes.com: city-st (then /zip/)
   const st = p ? p.st.toLowerCase() : "";
   const setLink = (n, text, href) => { const a = $(`link-${n}`); a.hidden = !text; a.textContent = text || ""; if (href) a.href = href; };
 
@@ -658,11 +660,17 @@ function render() {
     if (homePrice > 0) realtor += `/price-na-${homePrice}`;
     setLink(2, "Realtor.com", realtor);
 
-    // MBO is a by-owner site whose inventory is mostly for-sale (very few
-    // rentals), so it belongs here, in for-sale mode.
-    setLink(3, "MilitaryByOwner", p
-      ? `https://www.militarybyowner.com/${st}/homes-in-${searchZip}/?LsType=B`
-      : "https://www.militarybyowner.com/");
+    // Homes.com (independent of Zillow) needs a city-state/zip path and has
+    // deep inventory — replaces MilitaryByOwner, whose for-sale listings are
+    // too sparse to be useful.
+    let homes = "https://www.homes.com/";
+    if (p) {
+      const params = [];
+      if (homePrice > 0) params.push(`property_price_max=${homePrice}`);
+      if (beds !== "0") params.push(`bedrooms_min=${beds}`);
+      homes = `https://www.homes.com/${citySlugSlash}/${searchZip}/${params.length ? `?${params.join("&")}` : ""}`;
+    }
+    setLink(3, "Homes.com", homes);
   } else {
     let z = `https://www.zillow.com/homes/for_rent/${searchZip}_rb/`;
     if (beds !== "0") z += `${beds}-_beds/`;
