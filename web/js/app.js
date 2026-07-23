@@ -12,6 +12,7 @@ const usd = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD
 const state = {
   bah: null, zip: null, mode: "pct", pct: 100, offset: 0,
   range: { pct: [70, 130], usd: [-600, 600] },
+  deal: "rent",   // "rent" | "buy"
   resolved: null, // { label, zip, inst? } when set via city or installation pick
   anchor: null,   // { lng, lat, label } — commute origin (duty marker position)
   anchor2: null,  // { lng, lat, label } — optional second workplace
@@ -629,30 +630,71 @@ function render() {
   // otherwise the duty station area.
   const searchZip = state.candidateZip ?? state.zip;
   const p = placeForZip(searchZip);
+  const area = p ? `${p.city}, ${p.st} ${searchZip}` : searchZip;
   $("search-area-note").textContent = state.candidateZip
-    ? `Searching around ${p ? `${p.city}, ${p.st} ` : ""}${searchZip} — your selected spot on the map.`
+    ? `Searching around ${area} — your selected spot on the map.`
     : `Searching around your duty area (${searchZip}). Tap the map on a neighborhood to search there instead.`;
 
-  let zillow = `https://www.zillow.com/homes/for_rent/${searchZip}_rb/`;
-  if (beds !== "0") zillow += `${beds}-_beds/`;
-  if (baths !== "0") zillow += `${baths}-_baths/`;
-  if (budget > 0) zillow += `0-${budget}_mp/`;
-  $("link-zillow").href = zillow;
+  const citySlug = p ? `${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${searchZip}` : "";
+  const st = p ? p.st.toLowerCase() : "";
+  const setLink = (n, text, href) => { const a = $(`link-${n}`); a.hidden = !text; a.textContent = text || ""; if (href) a.href = href; };
 
-  // Apartments.com needs a city-state-zip slug (bare ZIP paths 404).
-  const aptParts = [];
-  if (beds !== "0") aptParts.push(`min-${beds}-bedrooms`);
-  if (budget > 0) aptParts.push(`under-${budget}`);
-  $("link-apartments").href = p
-    ? `https://www.apartments.com/${p.city.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${p.st.toLowerCase()}-${searchZip}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
-    : "https://www.apartments.com/";
+  if (state.deal === "buy") {
+    const homePrice = vaHomePrice(budget);
+    $("va-price").textContent = homePrice > 0 ? usd(homePrice) : "—";
+    $("va-sub").textContent = homePrice > 0
+      ? `at about ${usd(budget)}/mo · ${$("va-rate").value}% rate, $0 down`
+      : "Set a monthly budget above to estimate.";
 
-  // MilitaryByOwner's real search URLs are /{state}/homes-in-{zip}/?LsType=R
-  // (found via their GetAutoURL endpoint; the /homes?location= guess showed
-  // an empty page).
-  $("link-mbo").href = p
-    ? `https://www.militarybyowner.com/${p.st.toLowerCase()}/homes-in-${searchZip}/?LsType=R`
-    : "https://www.militarybyowner.com/";
+    // Zillow homes for sale (list-price filter).
+    let z = `https://www.zillow.com/homes/for_sale/${searchZip}_rb/`;
+    if (beds !== "0") z += `${beds}-_beds/`;
+    if (baths !== "0") z += `${baths}-_baths/`;
+    if (homePrice > 0) z += `0-${homePrice}_price/`;
+    setLink(1, "Zillow — Homes for Sale", z);
+
+    let realtor = `https://www.realtor.com/realestateandhomes-search/${searchZip}`;
+    if (beds !== "0") realtor += `/beds-${beds}`;
+    if (homePrice > 0) realtor += `/price-na-${homePrice}`;
+    setLink(2, "Realtor.com", realtor);
+
+    // MBO is a by-owner site whose inventory is mostly for-sale (very few
+    // rentals), so it belongs here, in for-sale mode.
+    setLink(3, "MilitaryByOwner", p
+      ? `https://www.militarybyowner.com/${st}/homes-in-${searchZip}/?LsType=B`
+      : "https://www.militarybyowner.com/");
+  } else {
+    let z = `https://www.zillow.com/homes/for_rent/${searchZip}_rb/`;
+    if (beds !== "0") z += `${beds}-_beds/`;
+    if (baths !== "0") z += `${baths}-_baths/`;
+    if (budget > 0) z += `0-${budget}_mp/`;
+    setLink(1, "Zillow Rentals", z);
+
+    const aptParts = [];
+    if (beds !== "0") aptParts.push(`min-${beds}-bedrooms`);
+    if (budget > 0) aptParts.push(`under-${budget}`);
+    setLink(2, "Apartments.com", p
+      ? `https://www.apartments.com/${citySlug}/${aptParts.length ? aptParts.join("-") + "/" : ""}`
+      : "https://www.apartments.com/");
+
+    // MilitaryByOwner has almost no rentals, so it's omitted in rent mode.
+    setLink(3, "", null);
+  }
+}
+
+// Reverse the VA-loan payment math: what home price does a given monthly
+// payment (PITI) support? $0 down, 30-yr fixed, funding fee financed.
+function vaHomePrice(monthly) {
+  if (!(monthly > 0)) return 0;
+  const rate = parseFloat($("va-rate").value);
+  const tax = parseFloat($("va-tax").value);
+  const r = (isNaN(rate) ? 6.5 : rate) / 1200;
+  const k = r / (1 - Math.pow(1 + r, -360)); // monthly P&I per $1 of loan
+  const ff = 0.0215;                          // VA funding fee, first use, financed
+  const insPct = 0.5;                          // annual insurance, percent of value
+  // tax & insurance are in percent, so /1200 converts to a monthly fraction.
+  const denom = (1 + ff) * k + (isNaN(tax) ? 1 : tax) / 1200 + insPct / 1200;
+  return Math.round(monthly / denom / 1000) * 1000;
 }
 
 // The location box accepts a 5-digit ZIP directly, or holds a picked city
@@ -923,6 +965,19 @@ $("browse-toggle").addEventListener("click", () => {
   if ($("browse-panel").hidden) renderStateList();
   else closeBrowse();
 });
+
+function setDeal(mode) {
+  state.deal = mode;
+  $("deal-rent").classList.toggle("active", mode === "rent");
+  $("deal-buy").classList.toggle("active", mode === "buy");
+  $("buy-estimate").hidden = mode !== "buy";
+  $("budget-label").textContent = mode === "buy" ? "target monthly payment" : "max monthly rent";
+  render();
+}
+$("deal-rent").addEventListener("click", () => setDeal("rent"));
+$("deal-buy").addEventListener("click", () => setDeal("buy"));
+$("va-rate").addEventListener("input", render);
+$("va-tax").addEventListener("input", render);
 $("iso-min").addEventListener("input", () => {
   $("iso-min-label").textContent = $("iso-min").value;
   scheduleFairZone();

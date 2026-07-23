@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <!-- ?v= is a cache-buster: bump it whenever style.css or app.js changes so
      browsers can't pair new HTML with a stale stylesheet/script. -->
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 <header class="topbar">
@@ -121,15 +121,32 @@
 
       <div class="budget-result">
         <div class="budget-amount" id="budget-amount">$0</div>
-        <div class="budget-label">max monthly rent</div>
+        <div class="budget-label" id="budget-label">max monthly rent</div>
         <div class="budget-delta" id="budget-delta"></div>
       </div>
     </section>
 
     <section class="card" id="search-card" hidden>
-      <h2>4 · Find rentals</h2>
-      <p class="hint">Opens listing sites pre-filtered to your budget and home size. Live in-app listings are coming in a later phase.</p>
+      <h2>4 · Find a home</h2>
+      <div class="mode-row">
+        <button class="mode-btn active" id="deal-rent" type="button">Rent</button>
+        <button class="mode-btn" id="deal-buy" type="button">Buy</button>
+      </div>
       <p class="hint" id="search-area-note"></p>
+
+      <div id="buy-estimate" hidden>
+        <div class="va-result">
+          <div class="va-amount" id="va-price">$0</div>
+          <div class="va-label">estimated home price a $0-down VA loan could support at this monthly payment</div>
+          <div class="va-sub" id="va-sub"></div>
+        </div>
+        <div class="va-assumptions">
+          <label class="range-edit">Rate % <input id="va-rate" type="number" step="0.125" min="1" max="15" value="6.5"></label>
+          <label class="range-edit">Prop. tax % <input id="va-tax" type="number" step="0.1" min="0" max="5" value="1.0"></label>
+        </div>
+        <p class="about-fine"><strong>Estimate only</strong> — not a loan offer, pre-approval, or financial advice. Assumes $0 down, 30-year fixed, a 2.15% VA funding fee financed (waived for many disabled veterans), and ~0.5% insurance; excludes HOA and closing costs. VA eligibility, rates, taxes, and insurance vary widely. Consult a VA-approved lender.</p>
+      </div>
+
       <div class="bb-row">
         <div class="bb-field">
           <label for="beds">Bedrooms</label>
@@ -153,9 +170,9 @@
         </div>
       </div>
       <div class="link-row">
-        <a class="listing-link" id="link-zillow" target="_blank" rel="noopener">Zillow Rentals</a>
-        <a class="listing-link" id="link-apartments" target="_blank" rel="noopener">Apartments.com</a>
-        <a class="listing-link" id="link-mbo" target="_blank" rel="noopener">MilitaryByOwner</a>
+        <a class="listing-link" id="link-1" target="_blank" rel="noopener"></a>
+        <a class="listing-link" id="link-2" target="_blank" rel="noopener"></a>
+        <a class="listing-link" id="link-3" target="_blank" rel="noopener"></a>
       </div>
     </section>
 
@@ -185,6 +202,6 @@
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-<script type="module" src="js/app.js?v=6"></script>
+<script type="module" src="js/app.js?v=7"></script>
 </body>
 </html>
