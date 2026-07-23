@@ -1,0 +1,40 @@
+Copyright © 2026 PCS Scout (github.com/Michael-W-R). All rights reserved.
+
+PROPRIETARY AND CONFIDENTIAL — ALL RIGHTS RESERVED
+
+This repository and its contents — including the original source code, visual
+design, user experience, documentation, and data-processing pipelines authored
+for PCS Scout (the "Work") — are the proprietary intellectual property of the
+copyright holder.
+
+No license, express or implied, is granted to any person or entity. You may
+NOT copy, reproduce, modify, adapt, translate, distribute, sublicense, sell,
+publicly host, deploy, or create derivative works from the Work, in whole or in
+part, by any means, without the prior written permission of the copyright
+holder. Viewing this repository for evaluation, hiring, or reference purposes
+does not grant any other right.
+
+All rights, including commercial and monetization rights, are reserved by the
+copyright holder.
+
+THIRD-PARTY AND PUBLIC-DOMAIN COMPONENTS are excluded from the restriction
+above and remain governed by their own licenses. These include, without
+limitation:
+
+  - GeoNames postal data — Creative Commons Attribution 4.0 (CC BY 4.0),
+    https://www.geonames.org/
+  - OpenStreetMap data — Open Database License (ODbL),
+    https://www.openstreetmap.org/copyright
+  - MapLibre GL JS and Turf.js — loaded from their CDNs under their respective
+    MIT licenses
+  - U.S. Government works incorporated as data (DoD/DTMO BAH tables, U.S. Dept.
+    of Education NCES school directory, U.S. Census Bureau TIGER military-area
+    boundaries) — public domain, used for informational purposes with
+    attribution in the site footer and About page
+
+THE WORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. The estimates,
+rates, drive times, school data, and listing links it produces are for planning
+only and are not guaranteed to be accurate or current.
+
+For licensing, permission, or partnership inquiries, contact the copyright
+holder via github.com/Michael-W-R.
