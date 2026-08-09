@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <!-- ?v= is a cache-buster: bump it whenever style.css or app.js changes so
      browsers can't pair new HTML with a stale stylesheet/script. -->
-<link rel="stylesheet" href="css/style.css?v=10">
+<link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
 <header class="topbar">
@@ -41,15 +41,24 @@
 
       <label for="zip">Duty Location, ZIP Code, or City</label>
       <div class="autocomplete">
-        <input id="zip" maxlength="80" placeholder="e.g. Fort Riley, 78248, or San Antonio" autocomplete="off">
+        <input id="zip" type="text" maxlength="80" placeholder="e.g. Fort Riley, 78248, or San Antonio" autocomplete="off">
         <div class="suggest" id="suggest" hidden></div>
       </div>
+
+      <label for="addr">Or enter a full street address</label>
+      <div class="addr-row">
+        <input id="addr" type="text" maxlength="120" placeholder="e.g. 1 Rock Island Arsenal, Rock Island, IL" autocomplete="off">
+        <button id="addr-go" type="button" class="addr-go">Set pin</button>
+      </div>
+      <p class="hint addr-hint">Drops the gold "Duty Station / Work Location" pin on an exact address — handy when your workplace isn't a listed installation.</p>
+      <div class="anchor-note" id="addr-note" hidden></div>
+
       <div class="mha-line" id="mha-line" hidden>
         <span id="mha-name"></span> <span class="mha-code" id="mha-code"></span>
       </div>
       <div class="anchor-note" id="city-note" hidden></div>
 
-      <label for="grade">Pay grade</label>
+      <label for="grade">Pay Grade</label>
       <select id="grade">
         <optgroup label="Enlisted">
           <option>E-1</option><option>E-2</option><option>E-3</option><option>E-4</option>
@@ -201,6 +210,6 @@
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-<script type="module" src="js/app.js?v=10"></script>
+<script type="module" src="js/app.js?v=11"></script>
 </body>
 </html>

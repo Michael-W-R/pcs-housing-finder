@@ -768,7 +768,7 @@ function activeZip() {
   return null;
 }
 
-function recalc() {
+function recalc(opts = {}) {
   const zip = activeZip();
   const grade = $("grade").value;
   const withDep = document.querySelector('input[name="dep"]:checked').value === "w";
@@ -777,7 +777,9 @@ function recalc() {
   const viaPick = !!(state.resolved && zip === state.resolved.zip);
   $("city-note").hidden = !(viaPick && result);
   if (viaPick && result) {
-    $("city-note").textContent = state.resolved.inst
+    $("city-note").textContent = state.resolved.fromAddr
+      ? `BAH from ZIP ${zip}, the nearest rated area to this address.`
+      : state.resolved.inst
       ? `BAH from ZIP ${zip}, the closest rated area to this installation.`
       : `Using central ZIP ${zip}. BAH can differ across a large metro — enter a specific ZIP to refine.`;
   }
@@ -800,7 +802,7 @@ function recalc() {
   $("mha-code").textContent = `(${result.mha.code})`;
   render();
   updateShareUrl();
-  if (zipChanged) centerOnZip(zip, result.mha.name);
+  if (zipChanged && !opts.skipCenter) centerOnZip(zip, result.mha.name);
 }
 
 // --- City autocomplete -------------------------------------------------
@@ -828,6 +830,65 @@ function pickInstallation(it) {
   recalc();
 }
 
+// --- Address geocoding (Nominatim / OpenStreetMap) ----------------------
+// Pin an exact work location (a building, gate, or civilian job) that isn't a
+// listed installation. Geocode on submit only — never per keystroke — to
+// respect Nominatim's usage policy.
+function shortAddr(h) {
+  const a = h.address || {};
+  const line = [a.house_number, a.road].filter(Boolean).join(" ");
+  const city = a.city || a.town || a.village || a.hamlet || a.county;
+  const parts = [line, city, a.state].filter(Boolean);
+  return parts.join(", ") || h.display_name.split(",").slice(0, 3).join(",").trim();
+}
+
+async function geocodeAddress(q) {
+  const url = "https://nominatim.openstreetmap.org/search?format=jsonv2"
+    + "&addressdetails=1&limit=1&countrycodes=us&q=" + encodeURIComponent(q);
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error("geocode http " + res.status);
+  const data = await res.json();
+  if (!data.length) return null;
+  const h = data[0];
+  const postcode = h.address && h.address.postcode ? h.address.postcode.slice(0, 5) : null;
+  return { lat: parseFloat(h.lat), lng: parseFloat(h.lon), zip: postcode, label: shortAddr(h) };
+}
+
+const escHtml = (s) =>
+  s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function pickAddress() {
+  const q = $("addr").value.trim();
+  if (!q) return;
+  const note = $("addr-note");
+  const btn = $("addr-go");
+  btn.disabled = true;
+  note.hidden = false;
+  note.textContent = "Locating…";
+  try {
+    const hit = await geocodeAddress(q);
+    if (!hit) { note.textContent = "Couldn't find that address. Try adding city and state."; return; }
+    const zip = (hit.zip && lookupMha(hit.zip))
+      ? hit.zip
+      : nearestZip(hit.lat, hit.lng, (z) => !!lookupMha(z));
+    if (!zip) { note.textContent = "Found the address, but no BAH area is nearby."; return; }
+    note.hidden = true;
+    state.resolved = { label: hit.label, zip, fromAddr: true, inst: { name: hit.label, lat: hit.lat, lng: hit.lng } };
+    $("zip").value = hit.label;
+    hideSuggest();
+    recalc({ skipCenter: true });
+    // Pin the EXACT address. recalc only re-centers when the ZIP changes, but
+    // two addresses can share a ZIP — so place the marker here, zoomed closer
+    // than the ZIP-level installation view.
+    placeDutyMarker([hit.lng, hit.lat], hit.label,
+      `<strong>${escHtml(hit.label)}</strong><br>Set from address`, 13);
+  } catch {
+    note.textContent = "Address lookup failed. Check your connection and try again.";
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 // slug() powers the shareable-link base= slugs (see updateShareUrl and the
 // URL-parsing lookup below).
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -839,7 +900,7 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g
 function updateShareUrl() {
   if (!state.zip) return;
   const p = new URLSearchParams();
-  if (state.resolved?.inst && state.resolved.zip === state.zip) {
+  if (state.resolved?.inst && !state.resolved.fromAddr && state.resolved.zip === state.zip) {
     p.set("base", slug(state.resolved.inst.name));
   } else {
     p.set("zip", state.zip);
@@ -959,6 +1020,11 @@ document.addEventListener("click", (e) => {
 });
 $("grade").addEventListener("change", recalc);
 document.querySelectorAll('input[name="dep"]').forEach((r) => r.addEventListener("change", recalc));
+
+$("addr-go").addEventListener("click", pickAddress);
+$("addr").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); pickAddress(); }
+});
 $("budget-slider").addEventListener("input", (e) => {
   const v = parseInt(e.target.value, 10);
   if (state.mode === "pct") state.pct = v; else state.offset = v;

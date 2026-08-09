@@ -180,6 +180,26 @@ input:focus, select:focus { outline: 2px solid var(--army-gold); border-color: v
 
 .autocomplete { position: relative; }
 
+/* Address geocoding row: full-width input + a compact "Set pin" button. */
+.addr-row { display: flex; gap: 0.4rem; }
+.addr-row input { flex: 1; width: auto; min-width: 0; }
+
+.addr-go {
+  flex: none;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--navy);
+  border-radius: 6px;
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.addr-go:hover { background: var(--navy-deep); }
+.addr-go:disabled { opacity: 0.6; cursor: default; }
+.addr-hint { margin: 0.35rem 0 0; }
+
 .suggest {
   position: absolute;
   top: 100%;
