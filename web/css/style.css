@@ -422,6 +422,66 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
 .lv-H { background: #6d28d9; }
 .lv-C { background: #607d8b; }
 
+/* Map legend / key (bottom-left MapLibre control). Light card over the map,
+   matching the other controls; collapsible via its header button. */
+.map-legend {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(18, 32, 58, 0.18);
+  color: var(--ink);
+  overflow: hidden;
+  max-width: 170px;
+}
+
+.lg-toggle {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--navy);
+  padding: 6px 9px;
+  cursor: pointer;
+}
+
+.lg-toggle::after { content: " \25BC"; font-size: 8px; color: var(--muted); }
+.map-legend.collapsed .lg-toggle::after { content: " \25B6"; }
+.map-legend.collapsed .lg-body { display: none; }
+
+.lg-body { padding: 0 9px 7px; }
+
+.lg-title {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin: 5px 0 2px;
+}
+
+.lg-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 1px 0;
+  font-size: 11px;
+}
+
+.lg-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.2);
+}
+
+.lg-pin { flex: none; display: block; }
+
 .link-row { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .listing-link {

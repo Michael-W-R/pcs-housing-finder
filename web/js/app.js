@@ -132,6 +132,60 @@ class BasemapToggle {
 }
 map.addControl(new BasemapToggle(), "top-right");
 
+// Map legend / key (bottom-left): explains the marker + school-dot colors.
+// Colors here MUST match the markers (dutyMarker/candMarker/anchor2) and the
+// schools-dots circle-color match expression above.
+const LEGEND_MARKERS = [
+  ["#c9a227", "Duty station"],
+  ["#1b2a41", "Home you're checking"],
+  ["#556b2f", "Second workplace"],
+];
+const LEGEND_SCHOOLS = [
+  ["#2e7d32", "Elementary"],
+  ["#b4530a", "Middle"],
+  ["#6d28d9", "High"],
+  ["#607d8b", "K–12"],
+];
+
+function legendPin(color) {
+  return `<svg class="lg-pin" width="11" height="15" viewBox="0 0 24 32" aria-hidden="true">`
+    + `<path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20C24 5.4 18.6 0 12 0z" fill="${color}"/>`
+    + `<circle cx="12" cy="11.5" r="4" fill="#fff"/></svg>`;
+}
+
+class MapLegend {
+  onAdd() {
+    const c = document.createElement("div");
+    c.className = "maplibregl-ctrl map-legend";
+    const group = (title, items, dot) =>
+      `<div class="lg-title">${title}</div>` +
+      items.map(([col, label]) =>
+        `<div class="lg-row">`
+        + (dot ? `<span class="lg-dot" style="background:${col}"></span>` : legendPin(col))
+        + `<span>${label}</span></div>`
+      ).join("");
+    // Start collapsed on the mobile layout (≤800px) so the key doesn't cover
+    // the small map; expanded by default on desktop.
+    const startCollapsed = window.innerWidth <= 800;
+    if (startCollapsed) c.classList.add("collapsed");
+    c.innerHTML =
+      `<button type="button" class="lg-toggle" aria-expanded="${!startCollapsed}">Map key</button>`
+      + `<div class="lg-body">`
+      + group("Markers", LEGEND_MARKERS, false)
+      + group("Schools", LEGEND_SCHOOLS, true)
+      + `</div>`;
+    const btn = c.querySelector(".lg-toggle");
+    btn.addEventListener("click", () => {
+      const collapsed = c.classList.toggle("collapsed");
+      btn.setAttribute("aria-expanded", String(!collapsed));
+    });
+    this._c = c;
+    return c;
+  }
+  onRemove() { this._c.remove(); }
+}
+map.addControl(new MapLegend(), "bottom-left");
+
 // setStyle wipes custom sources/layers (markers survive) — re-add our
 // overlays whenever a new style finishes loading.
 let lastZone = null;
