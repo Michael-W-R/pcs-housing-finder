@@ -136,9 +136,9 @@ map.addControl(new BasemapToggle(), "top-right");
 // Colors here MUST match the markers (dutyMarker/candMarker/anchor2) and the
 // schools-dots circle-color match expression above.
 const LEGEND_MARKERS = [
-  ["#c9a227", "Duty station"],
-  ["#1b2a41", "Home you're checking"],
-  ["#556b2f", "Second workplace"],
+  ["#c9a227", "Duty Station / Work Location"],
+  ["#1b2a41", "Potential Home Location"],
+  ["#556b2f", "Second Workplace"],
 ];
 const LEGEND_SCHOOLS = [
   ["#2e7d32", "Elementary"],

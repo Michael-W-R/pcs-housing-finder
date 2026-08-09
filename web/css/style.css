@@ -431,7 +431,7 @@ input[type="range"] { width: 100%; accent-color: var(--army-gold); }
   box-shadow: 0 1px 4px rgba(18, 32, 58, 0.18);
   color: var(--ink);
   overflow: hidden;
-  max-width: 170px;
+  max-width: 210px;
 }
 
 .lg-toggle {
