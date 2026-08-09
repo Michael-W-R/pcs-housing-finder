@@ -180,68 +180,6 @@ input:focus, select:focus { outline: 2px solid var(--army-gold); border-color: v
 
 .autocomplete { position: relative; }
 
-/* Mouse-only path to the same result as typing (also works where a network
-   policy disables keyboard input). Never replaces the type-ahead. */
-.link-btn {
-  display: block;
-  margin-top: 0.4rem;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--navy);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.browse-panel {
-  margin-top: 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.5rem;
-  max-height: 15rem;
-  overflow-y: auto;
-}
-
-.browse-panel .browse-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--navy);
-  margin-bottom: 0.4rem;
-}
-
-.browse-grid { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-
-.browse-grid button {
-  border: 1px solid var(--line);
-  background: #fff;
-  border-radius: 4px;
-  padding: 0.3rem 0.45rem;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.browse-grid button:hover { background: var(--paper); border-color: var(--army-gold); }
-
-.browse-list button {
-  display: block;
-  width: 100%;
-  text-align: left;
-  border: none;
-  border-bottom: 1px dashed var(--line);
-  background: none;
-  padding: 0.4rem 0.2rem;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-
-.browse-list button:hover { background: var(--paper); }
-.browse-list button:last-child { border-bottom: none; }
-
 .suggest {
   position: absolute;
   top: 100%;

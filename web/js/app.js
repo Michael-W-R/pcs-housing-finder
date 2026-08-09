@@ -825,65 +825,12 @@ function pickInstallation(it) {
   const label = `${it.n}, ${it.s}`;
   state.resolved = { label, zip, inst: { name: label, lat: it.lat, lng: it.lng } };
   $("zip").value = label;
-  closeBrowse();
   recalc();
 }
 
-// --- Browse installations by state (mouse only) -------------------------
-
+// slug() powers the shareable-link base= slugs (see updateShareUrl and the
+// URL-parsing lookup below).
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
-function closeBrowse() {
-  $("browse-panel").hidden = true;
-  $("browse-panel").innerHTML = "";
-}
-
-function renderStateList() {
-  const panel = $("browse-panel");
-  panel.hidden = false;
-  panel.innerHTML = '<div class="browse-head"><span>Pick a state</span></div>';
-  const grid = document.createElement("div");
-  grid.className = "browse-grid";
-  const states = [...new Set(allInstallations().map((i) => i.s).filter(Boolean))].sort();
-  for (const st of states) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = st;
-    b.addEventListener("click", () => renderStateInstallations(st));
-    grid.appendChild(b);
-  }
-  panel.appendChild(grid);
-}
-
-function renderStateInstallations(st) {
-  const panel = $("browse-panel");
-  panel.innerHTML = "";
-  const head = document.createElement("div");
-  head.className = "browse-head";
-  head.innerHTML = `<span>${st} installations</span>`;
-  const back = document.createElement("button");
-  back.type = "button";
-  back.className = "link-btn";
-  back.style.margin = "0";
-  back.textContent = "‹ All states";
-  back.addEventListener("click", renderStateList);
-  head.appendChild(back);
-  panel.appendChild(head);
-
-  const list = document.createElement("div");
-  list.className = "browse-list";
-  const items = allInstallations()
-    .filter((i) => i.s === st)
-    .sort((a, b) => a.n.localeCompare(b.n));
-  for (const it of items) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = it.n;
-    b.addEventListener("click", () => pickInstallation(it));
-    list.appendChild(b);
-  }
-  panel.appendChild(list);
-}
 
 // --- Shareable links ----------------------------------------------------
 
@@ -1023,10 +970,6 @@ $("range-min").addEventListener("change", updateRange);
 $("range-max").addEventListener("change", updateRange);
 $("beds").addEventListener("change", render);
 $("baths").addEventListener("change", render);
-$("browse-toggle").addEventListener("click", () => {
-  if ($("browse-panel").hidden) renderStateList();
-  else closeBrowse();
-});
 
 function setDeal(mode) {
   state.deal = mode;

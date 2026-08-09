@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <!-- ?v= is a cache-buster: bump it whenever style.css or app.js changes so
      browsers can't pair new HTML with a stale stylesheet/script. -->
-<link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
 <header class="topbar">
@@ -44,8 +44,6 @@
         <input id="zip" maxlength="80" placeholder="e.g. Fort Riley, 78248, or San Antonio" autocomplete="off">
         <div class="suggest" id="suggest" hidden></div>
       </div>
-      <button class="link-btn" id="browse-toggle" type="button">Or browse installations by state — no typing needed</button>
-      <div class="browse-panel" id="browse-panel" hidden></div>
       <div class="mha-line" id="mha-line" hidden>
         <span id="mha-name"></span> <span class="mha-code" id="mha-code"></span>
       </div>
@@ -203,6 +201,6 @@
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-<script type="module" src="js/app.js?v=9"></script>
+<script type="module" src="js/app.js?v=10"></script>
 </body>
 </html>
